@@ -1,6 +1,6 @@
 # @Blog
 
-Blog for poor people who can't pay for hosting, we provide some feature to keep user a life.
+Blog for poor people who can't pay for hosting, we provide some features to keep user a live.
 
 - Markdown to static HTML - thanks to [showdown](https://www.npmjs.com/package/showdown)
 - Code *highlight* - thanks to [highlight.js](https://highlightjs.org/)

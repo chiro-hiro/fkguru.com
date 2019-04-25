@@ -1,0 +1,25 @@
+{
+  "name": "ablog",
+  "version": "1.0.0",
+  "description": "Write blog with markdown",
+  "main": "index.js",
+  "dependencies": {
+    "colors": "^1.3.3",
+    "moment": "^2.24.0",
+    "pretty": "^2.0.0",
+    "showdown": "^1.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js && git add ./docs/* ./blog/* && git commit -a -m \"Update blog\" && git push",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "blog",
+    "markdown",
+    "easy",
+    "blog"
+  ],
+  "author": "chiro@fkguru.com",
+  "license": "MIT"
+}

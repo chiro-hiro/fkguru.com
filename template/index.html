@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="assets/styles/basic.css">
+  <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
+  <script src="assets/highlight.pack.js"></script>
+  <title>${title} - aBlog</title>
+</head>
+
+<body>
+  <div class="forkme">
+    <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
+      <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full"
+        alt="Fork me on GitHub" data-recalc-dims="1">
+    </a>
+  </div>
+  <div class="page">
+    <div class="page-tool">
+      <h2>Categories</h2>
+      <div>
+        ${categories}
+      </div>
+      <h2>Tags</h2>
+      <div>
+        ${tags}
+      </div>
+    </div>
+    <div class="page-content">
+      ${content}
+    </div>
+  </div>
+  <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
+</body>
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightBlock(block);
+    });
+  });
+</script>
+
+</html>

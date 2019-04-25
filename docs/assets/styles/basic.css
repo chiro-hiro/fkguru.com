@@ -1,0 +1,128 @@
+body{
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
+  color: white;
+  background-color: #3c4444;
+  line-height: 2em;
+  padding-bottom: 64px;
+}
+
+pre > code{
+  line-height: 1.2em;
+  font-size: 1.2em;
+}
+
+code{
+  color: #ff9659;
+  background-color: #323738;
+  padding: 2px;
+  border-radius: 5px;
+}
+
+h1{
+  font-family: Arial, Helvetica, sans-serif;
+  color: #E27D60;
+  text-transform: capitalize;
+}
+
+h2{
+  font-family: Arial, Helvetica, sans-serif;
+  color: #c38d9e;
+  text-transform: capitalize;
+}
+
+a, a:link, a:active, a:visited {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-decoration: none;
+  font-size: 1em;
+  color: #41B3A3;
+}
+
+div.article-tags{
+  margin: 5px;
+  padding: 5px;
+}
+
+span.article-tag{
+  text-transform: lowercase;
+  padding: 5px;
+  margin: 5px;
+}
+
+span.article-category{
+  text-transform: capitalize;
+  padding: 5px;
+  margin: 5px;
+}
+
+span.article-tag::before {
+  content: "# ";
+  color: #E27D60;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+}
+
+span.article-category::before {
+  content: "• ";
+  color: #E27D60;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+}
+
+.page {
+  margin: auto;
+  max-width: 90%;
+  display: -webkit-flex; /* Safari */
+  -webkit-flex-flow: row wrap; /* Safari 6.1+ */
+  display: flex;
+  flex-flow: row wrap;
+}
+
+@media only screen and (max-width: 1000px) {
+  .page {
+    margin: auto;
+    max-width: 90%;
+    display: block;
+    flex-flow: column;
+    -webkit-flex-flow: column;
+  }
+}
+
+.page-tool {
+  width: 20%;
+}
+
+@media only screen and (max-width: 1000px) {
+  .page-tool {
+    width: 100%;
+  }
+}
+
+.page-content{
+  width: 80%;
+}
+
+@media only screen and (max-width: 1000px) {
+  .page-content{
+    width: 100%;
+  }
+}
+
+
+.forkme{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.copyright{
+  width: 100%;
+  position: fixed;
+  text-align: center;
+  background: #4b4d51;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 0.8em;
+  right: 0px;
+  bottom: 0px;
+  padding: 3px;
+}

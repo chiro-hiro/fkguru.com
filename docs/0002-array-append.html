@@ -1,0 +1,112 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="assets/styles/basic.css">
+    <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
+    <script src="assets/highlight.pack.js"></script>
+    <title>I++ and I-- which is faster with array operator? - aBlog</title>
+  </head>
+
+  <body>
+    <div class="forkme">
+      <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
+        <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
+      </a>
+    </div>
+    <div class="page">
+      <div class="page-tool">
+        <h2>Categories</h2>
+        <div>
+          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
+          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
+          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
+        </div>
+        <h2>Tags</h2>
+        <div>
+          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span><br />
+          <span class="article-tag"><a href="tag-c.html">c</a></span><br />
+          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span><br />
+          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span><br />
+          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
+        </div>
+      </div>
+      <div class="page-content">
+        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
+        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
+        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
+        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 175 μs
+</code></pre>
+        <p>Let try the same with <code>i--</code>:</p>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 175 μs
+</code></pre>
+        <p>Wow, it's the same, why the hell it happened?.</p>
+        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+
+let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 197 μs
+I++ cost: 202 μs
+</code></pre>
+        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+
+let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 195 μs
+I-- cost: 205 μs
+</code></pre>
+        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p>
+      </div>
+    </div>
+    <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
+  </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    });
+  </script>
+
+</html>

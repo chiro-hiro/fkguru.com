@@ -1,0 +1,120 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="assets/styles/basic.css">
+    <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
+    <script src="assets/highlight.pack.js"></script>
+    <title>Programming with libpcap - aBlog</title>
+  </head>
+
+  <body>
+    <div class="forkme">
+      <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
+        <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
+      </a>
+    </div>
+    <div class="page">
+      <div class="page-tool">
+        <h2>Categories</h2>
+        <div>
+          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
+          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
+          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
+        </div>
+        <h2>Tags</h2>
+        <div>
+          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span><br />
+          <span class="article-tag"><a href="tag-c.html">c</a></span><br />
+          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span><br />
+          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span><br />
+          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
+        </div>
+      </div>
+      <div class="page-content">
+        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
+        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
+        <h2 id="installdevelopmentenvironment">Install development environment</h2>
+        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
+        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
+</code></pre>
+        <p><code>libpcap-devel</code> is required, of course.</p>
+        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
+        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;pcap.h&gt;
+
+int main()
+{
+  pcap_if_t *alldevs;
+  pcap_if_t *d;
+  int i = 0;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* Retrieve the device list from the local machine */
+  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
+  {
+    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    return 0;
+  }
+
+  /* Print the list */
+  for (d = alldevs; d != NULL; d = d-&gt;next)
+  {
+    printf("%d. %s", ++i, d-&gt;name);
+    if (d-&gt;description)
+      printf(" (%s)\n", d-&gt;description);
+    else
+      printf(" (No description available)\n");
+  }
+
+  if (i == 0)
+  {
+    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
+    return 1;
+  }
+
+  /* Free device list */
+  pcap_freealldevs(alldevs);
+}
+</code></pre>
+        <h2 id="compileandrun">Compile and run</h2>
+        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
+        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
+</code></pre>
+        <p>Result:</p>
+        <pre><code>1. enp3s0 (No description available)
+2. lo (No description available)
+3. any (Pseudo-device that captures on all interfaces)
+4. virbr0 (No description available)
+5. bluetooth-monitor (Bluetooth Linux Monitor)
+6. nflog (Linux netfilter log (NFLOG) interface)
+7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
+8. bluetooth0 (Bluetooth adapter number 0)
+9. usbmon0 (All USB buses)
+10. wlo1 (No description available)
+11. usbmon1 (USB bus number 1)
+12. usbmon2 (USB bus number 2)
+13. virbr0-nic (No description available)
+</code></pre>
+        <p><a href="https://fkguru.com/0004-capture-all-tcp-traffic.html">Capture all TCP traffic </a>.</p>
+        <h2 id="credits">Credits</h2>
+        <p>Thank to there guys,</p>
+        <ul>
+          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
+          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
+          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
+  </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    });
+  </script>
+
+</html>

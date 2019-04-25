@@ -1,0 +1,127 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="assets/styles/basic.css">
+    <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
+    <script src="assets/highlight.pack.js"></script>
+    <title>Xorshift based pseudo random - aBlog</title>
+  </head>
+
+  <body>
+    <div class="forkme">
+      <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
+        <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
+      </a>
+    </div>
+    <div class="page">
+      <div class="page-tool">
+        <h2>Categories</h2>
+        <div>
+          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
+          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
+          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
+        </div>
+        <h2>Tags</h2>
+        <div>
+          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span><br />
+          <span class="article-tag"><a href="tag-c.html">c</a></span><br />
+          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span><br />
+          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span><br />
+          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
+        </div>
+      </div>
+      <div class="page-content">
+        <h1 id="xorshiftbasedpseudorandom">Xorshift based pseudo random</h1>
+        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspire me to create another kind of <code>Xorshift</code> based without static initial.</p>
+        <p>The basic concept is:</p>
+        <ul>
+          <li>Seeding with a initial value <code>seed</code></li>
+          <li>Repeat caculation for every bit of <code>seed</code></li>
+          <li><code>i</code> is denoted for bit <code>i th</code></li>
+          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
+          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
+          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
+        </ul>
+        <h2 id="implementation">Implementation</h2>
+        <h3 id="implementinpython">Implement in Python</h3>
+        <pre><code class="python language-python">import random
+
+seed = random.randint(0x55555555, 0xffffffff)
+
+
+def rnd():
+    global seed
+    x = 0
+    for i in range(32):
+        if (seed &gt;&gt; i) &amp; 1:
+            x ^= seed &gt;&gt; i
+        else:
+            x ^= seed &lt;&lt; i
+    x = 0xffffffff &amp; x
+    seed = x
+    return x
+
+
+for i in range(1000):
+    print rnd()
+</code></pre>
+        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
+        <pre><code class="js language-js">const crypto = require('crypto');
+
+//Generate seed randomBytes
+var seed = crypto.randomBytes(4).readUInt32LE(0);
+
+//XorShift based PRNG
+function rnd(){
+    var x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        //Shift right if [i th] bit is equal to 1, otherwise shift letf
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x &gt;&gt;&gt; 0;
+}
+
+for(let i = 0; i &lt; 1000; i++){
+  process.stdout.write(`${i}\n`)
+}
+</code></pre>
+        <h3 id="implementinc">Implement in C</h3>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+unsigned int seed;
+
+unsigned int rnd(){
+    unsigned int x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x;
+}
+
+int main(){
+    time_t tsec;
+    int i = 0;
+    tsec = time(NULL);
+    seed = (unsigned int)tsec;
+    for(;i &lt; 1000; i++) printf("%u\n", rnd());
+    return 0;
+}
+</code></pre>
+        <p>Test:</p>
+        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
+</code></pre>
+      </div>
+    </div>
+    <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
+  </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    });
+  </script>
+
+</html>

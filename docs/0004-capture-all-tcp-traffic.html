@@ -33,9 +33,9 @@
       </div>
       <div class="page-content">
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
-        <p>Before you read this article <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
+        <p>Before you read this article, <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
-        <p>I wrote some method to help me observer the result form memory, all these thing better to print in friendly hexadecimal.</p>
+        <p>I wrote some methods to help me observer the result form memory, all these thing better to print in friendly hexadecimal.</p>
         <pre><code>00000000:   8A 17 03 03  00 5D 00 00  00 00 00 00  00 BD 2E 02    .....]..........
 00000020:   94 FE 87 9F  2B 5E 57 F9  5E 95 F9 76  3F 2C 02 A0    ....+^W.^..v?,..
 00000040:   66 66 38 3E  03 B5 FD 2C  BB 6C 9F 87  39 30 3A B4    ff8&gt;...,.l..90:.
@@ -45,7 +45,7 @@
 000000C0:   08 62                                                 .b
 </code></pre>
         <p>It's pretty cool, right?</p>
-        <h3 id="methodtoprintbinarylikeabove">Method to print binary like above</h3>
+        <h3 id="methodstoprintbinarylikeabove">Methods to print binary like above</h3>
         <pre><code class="c language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;pcap.h&gt;

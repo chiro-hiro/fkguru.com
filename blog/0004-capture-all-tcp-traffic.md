@@ -7,11 +7,11 @@ tags: c, pcap
 
 # Capture TCP Traffic
 
-Before you read this article [Programing with pcap](https://fkguru.com/0003-programing-with-pcap.html).
+Before you read this article, [Programing with pcap](https://fkguru.com/0003-programing-with-pcap.html).
 
 ## Dump binary data
 
-I wrote some method to help me observer the result form memory, all these thing better to print in friendly hexadecimal.
+I wrote some methods to help me observer the result form memory, all these thing better to print in friendly hexadecimal.
 
 ```
 00000000:   8A 17 03 03  00 5D 00 00  00 00 00 00  00 BD 2E 02    .....]..........
@@ -25,7 +25,7 @@ I wrote some method to help me observer the result form memory, all these thing 
 
 It's pretty cool, right?
 
-### Method to print binary like above
+### Methods to print binary like above
 
 ```c
 #include <stdio.h>

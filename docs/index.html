@@ -113,9 +113,9 @@ int main(){
         <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
 </code></pre></br>
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
-        <p>Before you read this article <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
+        <p>Before you read this article, <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
-        <p>I wrote some method to help me observer the result form memory, all these thing better to print in friendly hexadecimal.</p>
+        <p>I wrote some methods to help me observer the result form memory, all these thing better to print in friendly hexadecimal.</p>
         <pre><code>00000000:   8A 17 03 03  00 5D 00 00  00 00 00 00  00 BD 2E 02    .....]..........
 00000020:   94 FE 87 9F  2B 5E 57 F9  5E 95 F9 76  3F 2C 02 A0    ....+^W.^..v?,..
 00000040:   66 66 38 3E  03 B5 FD 2C  BB 6C 9F 87  39 30 3A B4    ff8&gt;...,.l..90:.
@@ -125,7 +125,7 @@ int main(){
 000000C0:   08 62                                                 .b
 </code></pre>
         <p>It's pretty cool, right?</p>
-        <h3 id="methodtoprintbinarylikeabove">Method to print binary like above</h3>
+        <h3 id="methodstoprintbinarylikeabove">Methods to print binary like above</h3>
         <pre><code class="c language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;pcap.h&gt;
@@ -357,6 +357,71 @@ void packet_handler(
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
 </code></pre></br>
+        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
+        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
+        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
+        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 175 μs
+</code></pre>
+        <p>Let try the same with <code>i--</code>:</p>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 175 μs
+</code></pre>
+        <p>Wow, it's the same, why the hell it happened?.</p>
+        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+
+let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 197 μs
+I++ cost: 202 μs
+</code></pre>
+        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+
+let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 195 μs
+I-- cost: 205 μs
+</code></pre>
+        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p></br>
         <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
         <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
         <h2 id="installdevelopmentenvironment">Install development environment</h2>
@@ -429,72 +494,7 @@ int main()
           <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
           <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
           <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
-        </ul></br>
-        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
-        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
-        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
-        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 175 μs
-</code></pre>
-        <p>Let try the same with <code>i--</code>:</p>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 175 μs
-</code></pre>
-        <p>Wow, it's the same, why the hell it happened?.</p>
-        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-
-let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 197 μs
-I++ cost: 202 μs
-</code></pre>
-        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-
-let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 195 μs
-I-- cost: 205 μs
-</code></pre>
-        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p>
+        </ul>
       </div>
     </div>
     <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>

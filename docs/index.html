@@ -32,224 +32,6 @@
         </div>
       </div>
       <div class="page-content">
-        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
-        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
-        <h2 id="installdevelopmentenvironment">Install development environment</h2>
-        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
-        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
-</code></pre>
-        <p><code>libpcap-devel</code> is required, of course.</p>
-        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
-        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;pcap.h&gt;
-
-int main()
-{
-  pcap_if_t *alldevs;
-  pcap_if_t *d;
-  int i = 0;
-  char errbuf[PCAP_ERRBUF_SIZE];
-
-  /* Retrieve the device list from the local machine */
-  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
-  {
-    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
-    return 0;
-  }
-
-  /* Print the list */
-  for (d = alldevs; d != NULL; d = d-&gt;next)
-  {
-    printf("%d. %s", ++i, d-&gt;name);
-    if (d-&gt;description)
-      printf(" (%s)\n", d-&gt;description);
-    else
-      printf(" (No description available)\n");
-  }
-
-  if (i == 0)
-  {
-    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
-    return 1;
-  }
-
-  /* Free device list */
-  pcap_freealldevs(alldevs);
-}
-</code></pre>
-        <h2 id="compileandrun">Compile and run</h2>
-        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
-        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
-</code></pre>
-        <p>Result:</p>
-        <pre><code>1. enp3s0 (No description available)
-2. lo (No description available)
-3. any (Pseudo-device that captures on all interfaces)
-4. virbr0 (No description available)
-5. bluetooth-monitor (Bluetooth Linux Monitor)
-6. nflog (Linux netfilter log (NFLOG) interface)
-7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
-8. bluetooth0 (Bluetooth adapter number 0)
-9. usbmon0 (All USB buses)
-10. wlo1 (No description available)
-11. usbmon1 (USB bus number 1)
-12. usbmon2 (USB bus number 2)
-13. virbr0-nic (No description available)
-</code></pre>
-        <p><a href="https://fkguru.com/0004-capture-all-tcp-traffic.html">Capture all TCP traffic </a>.</p>
-        <h2 id="credits">Credits</h2>
-        <p>Thank to there guys,</p>
-        <ul>
-          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
-          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
-          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
-        </ul></br>
-        <h1 id="xorshiftbasedpseudorandom">Xorshift based pseudo random</h1>
-        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspire me to create another kind of <code>Xorshift</code> based without static initial.</p>
-        <p>The basic concept is:</p>
-        <ul>
-          <li>Seeding with a initial value <code>seed</code></li>
-          <li>Repeat caculation for every bit of <code>seed</code></li>
-          <li><code>i</code> is denoted for bit <code>i th</code></li>
-          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
-          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
-          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
-        </ul>
-        <h2 id="implementation">Implementation</h2>
-        <h3 id="implementinpython">Implement in Python</h3>
-        <pre><code class="python language-python">import random
-
-seed = random.randint(0x55555555, 0xffffffff)
-
-
-def rnd():
-    global seed
-    x = 0
-    for i in range(32):
-        if (seed &gt;&gt; i) &amp; 1:
-            x ^= seed &gt;&gt; i
-        else:
-            x ^= seed &lt;&lt; i
-    x = 0xffffffff &amp; x
-    seed = x
-    return x
-
-
-for i in range(1000):
-    print rnd()
-</code></pre>
-        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
-        <pre><code class="js language-js">const crypto = require('crypto');
-
-//Generate seed randomBytes
-var seed = crypto.randomBytes(4).readUInt32LE(0);
-
-//XorShift based PRNG
-function rnd(){
-    var x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        //Shift right if [i th] bit is equal to 1, otherwise shift letf
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x &gt;&gt;&gt; 0;
-}
-
-for(let i = 0; i &lt; 1000; i++){
-  process.stdout.write(`${i}\n`)
-}
-</code></pre>
-        <h3 id="implementinc">Implement in C</h3>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;time.h&gt;
-
-unsigned int seed;
-
-unsigned int rnd(){
-    unsigned int x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x;
-}
-
-int main(){
-    time_t tsec;
-    int i = 0;
-    tsec = time(NULL);
-    seed = (unsigned int)tsec;
-    for(;i &lt; 1000; i++) printf("%u\n", rnd());
-    return 0;
-}
-</code></pre>
-        <p>Test:</p>
-        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
-</code></pre></br>
-        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
-        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
-        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
-        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 175 μs
-</code></pre>
-        <p>Let try the same with <code>i--</code>:</p>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 175 μs
-</code></pre>
-        <p>Wow, it's the same, why the hell it happened?.</p>
-        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-
-let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 197 μs
-I++ cost: 202 μs
-</code></pre>
-        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-
-let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 195 μs
-I-- cost: 205 μs
-</code></pre>
-        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p></br>
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
         <p>Before you read this article, <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
@@ -494,7 +276,225 @@ void packet_handler(
 00000220:   1A 60 5A 94  B3 83 22 EB  F3 60 98 24  54 8F FB 94    .`Z..."..`.$T...
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
+</code></pre></br>
+        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
+        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
+        <h2 id="installdevelopmentenvironment">Install development environment</h2>
+        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
+        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
 </code></pre>
+        <p><code>libpcap-devel</code> is required, of course.</p>
+        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
+        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;pcap.h&gt;
+
+int main()
+{
+  pcap_if_t *alldevs;
+  pcap_if_t *d;
+  int i = 0;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* Retrieve the device list from the local machine */
+  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
+  {
+    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    return 0;
+  }
+
+  /* Print the list */
+  for (d = alldevs; d != NULL; d = d-&gt;next)
+  {
+    printf("%d. %s", ++i, d-&gt;name);
+    if (d-&gt;description)
+      printf(" (%s)\n", d-&gt;description);
+    else
+      printf(" (No description available)\n");
+  }
+
+  if (i == 0)
+  {
+    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
+    return 1;
+  }
+
+  /* Free device list */
+  pcap_freealldevs(alldevs);
+}
+</code></pre>
+        <h2 id="compileandrun">Compile and run</h2>
+        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
+        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
+</code></pre>
+        <p>Result:</p>
+        <pre><code>1. enp3s0 (No description available)
+2. lo (No description available)
+3. any (Pseudo-device that captures on all interfaces)
+4. virbr0 (No description available)
+5. bluetooth-monitor (Bluetooth Linux Monitor)
+6. nflog (Linux netfilter log (NFLOG) interface)
+7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
+8. bluetooth0 (Bluetooth adapter number 0)
+9. usbmon0 (All USB buses)
+10. wlo1 (No description available)
+11. usbmon1 (USB bus number 1)
+12. usbmon2 (USB bus number 2)
+13. virbr0-nic (No description available)
+</code></pre>
+        <p><a href="https://fkguru.com/0004-capture-all-tcp-traffic.html">Capture all TCP traffic </a>.</p>
+        <h2 id="credits">Credits</h2>
+        <p>Thanks to these guys,</p>
+        <ul>
+          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
+          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
+          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
+        </ul></br>
+        <h1 id="xorshiftbasedpseudorandom">Xorshift based pseudo random</h1>
+        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspire me to create another kind of <code>Xorshift</code> based without static initial.</p>
+        <p>The basic concept is:</p>
+        <ul>
+          <li>Seeding with a initial value <code>seed</code></li>
+          <li>Repeat caculation for every bit of <code>seed</code></li>
+          <li><code>i</code> is denoted for bit <code>i th</code></li>
+          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
+          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
+          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
+        </ul>
+        <h2 id="implementation">Implementation</h2>
+        <h3 id="implementinpython">Implement in Python</h3>
+        <pre><code class="python language-python">import random
+
+seed = random.randint(0x55555555, 0xffffffff)
+
+
+def rnd():
+    global seed
+    x = 0
+    for i in range(32):
+        if (seed &gt;&gt; i) &amp; 1:
+            x ^= seed &gt;&gt; i
+        else:
+            x ^= seed &lt;&lt; i
+    x = 0xffffffff &amp; x
+    seed = x
+    return x
+
+
+for i in range(1000):
+    print rnd()
+</code></pre>
+        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
+        <pre><code class="js language-js">const crypto = require('crypto');
+
+//Generate seed randomBytes
+var seed = crypto.randomBytes(4).readUInt32LE(0);
+
+//XorShift based PRNG
+function rnd(){
+    var x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        //Shift right if [i th] bit is equal to 1, otherwise shift letf
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x &gt;&gt;&gt; 0;
+}
+
+for(let i = 0; i &lt; 1000; i++){
+  process.stdout.write(`${i}\n`)
+}
+</code></pre>
+        <h3 id="implementinc">Implement in C</h3>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+unsigned int seed;
+
+unsigned int rnd(){
+    unsigned int x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x;
+}
+
+int main(){
+    time_t tsec;
+    int i = 0;
+    tsec = time(NULL);
+    seed = (unsigned int)tsec;
+    for(;i &lt; 1000; i++) printf("%u\n", rnd());
+    return 0;
+}
+</code></pre>
+        <p>Test:</p>
+        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
+</code></pre></br>
+        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
+        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
+        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
+        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 175 μs
+</code></pre>
+        <p>Let try the same with <code>i--</code>:</p>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 175 μs
+</code></pre>
+        <p>Wow, it's the same, why the hell it happened?.</p>
+        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
+        <pre><code class="js language-js">let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+
+let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I-- cost: 197 μs
+I++ cost: 202 μs
+</code></pre>
+        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
+        <pre><code class="js language-js">let a = [];
+let s = Date.now()
+for (let i = 0; i &lt; 10000000; i++) {
+  a.push(i);
+}
+console.log('I++ cost:', Date.now() - s, 'μs');
+
+let b = [];
+let c = Date.now()
+for (let i = 10000000; i &gt; 0; i--) {
+  b.push(i);
+}
+console.log('I-- cost:', Date.now() - c, 'μs');
+</code></pre>
+        <p>Result:</p>
+        <pre><code>I++ cost: 195 μs
+I-- cost: 205 μs
+</code></pre>
+        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p>
       </div>
     </div>
     <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>

@@ -92,7 +92,7 @@ Result:
 
 ## Credits
 
-Thank to there guys,
+Thanks to these guys,
 
 - [Programming with pcap, Tim Carstens](https://www.tcpdump.org/pcap.html)
 - [Using libpcap in C](https://www.devdungeon.com/content/using-libpcap-c)

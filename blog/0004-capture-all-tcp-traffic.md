@@ -84,7 +84,7 @@ void brintf(void *data, size_t offset, size_t len)
 
   for (int c = 0; c < len; c++)
   {
-    //Clean buffer every cycle
+    // AND with 0xff to make sure we have pure char
     tmp = 0xff & dataPointer[c];
     sprintf(hexBuffer, "%X", tmp);
     //Only show printable

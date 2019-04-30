@@ -1,7 +1,7 @@
 ---
 title: Onward in XOR cipher
 date: Tue Apr 30 21:09:39 +07 2019
-categories: Programing, Cryptography
+categories: Algorithm, Cryptography
 tags: cryptography, algorithm, typescript
 ---
 

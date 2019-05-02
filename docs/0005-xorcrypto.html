@@ -36,14 +36,14 @@
       </div>
       <div class="page-content">
         <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
-        <p>Long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically.</p>
+        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
         <h2 id="hashfunction">Hash function</h2>
-        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on itself result to get new <code>digest</code>, it won't repeat by sequence.</p>
+        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
         <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
         <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
         <h2 id="implementation">Implementation</h2>
         <ul>
-          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM xorCrypto</a></li>
+          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
           <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
         </ul>
       </div>

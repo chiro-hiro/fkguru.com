@@ -7,7 +7,7 @@ tags: prng, algorithm
 
 # Xorshift based pseudo random
 
-This paper [Xorshift RNGs, July 2003, Marsaglia, George](https://www.jstatsoft.org/v08/i14/paper) was inspire me to create another kind of `Xorshift` based without static initial.
+This paper [Xorshift RNGs, July 2003, Marsaglia, George](https://www.jstatsoft.org/v08/i14/paper) was inspired me to create another kind of `Xorshift` based without static initial.
 
 The basic concept is:
 - Seeding with a initial value `seed`
@@ -98,3 +98,10 @@ Test:
 ```
 gcc test.c -o test && chmod a+x test && ./test
 ```
+
+## Conclusion
+
+- `0x00000000` and other kind of *poor entropy seed* are the worst thing to this **algorithm**
+- The result is predictable within disclosed `seed`
+- We need some kind of `fallback mode` for *low entropy seed*
+- It isn't safe for cryptography purpose

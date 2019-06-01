@@ -56,7 +56,7 @@ span.article-category{
 }
 
 span.article-tag::before {
-  content: "# ";
+  content: "#";
   color: #E27D60;
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;

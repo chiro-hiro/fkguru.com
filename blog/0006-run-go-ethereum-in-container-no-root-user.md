@@ -13,7 +13,7 @@ I do serveral experiments on Ethereum blockchain it's really fun to play around.
 
 `docker-compose.yml` is quite familiar to start a docker project.
 
-```yml
+```
 version: "3.7"
 services:
   geth:
@@ -70,7 +70,7 @@ User's id and group's id were specified as a unique number `1988`. Let's take a 
 
 [Alpine Linux](https://alpinelinux.org/) is good choice to begin with, `geth` is also supported by default that's make my job easier.
 
-```dockerfile
+```
 FROM alpine:latest
 
 # Consumed agurments from host machine

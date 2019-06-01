@@ -43,7 +43,7 @@
         <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
         <h2 id="dockercompose">Docker compose</h2>
         <p><code>docker-compose.yml</code> is quite familiar to start a docker project.</p>
-        <pre><code class="yml language-yml">version: "3.7"
+        <pre><code>version: "3.7"
 services:
   geth:
     image: my-geth:latest
@@ -90,7 +90,7 @@ sudo docker-compose build \
         <p>User's id and group's id were specified as a unique number <code>1988</code>. Let's take a look inside <code>Dockerfile</code></p>
         <h2 id="dockerfile">Dockerfile</h2>
         <p><a href="https://alpinelinux.org/">Alpine Linux</a> is good choice to begin with, <code>geth</code> is also supported by default that's make my job easier.</p>
-        <pre><code class="dockerfile language-dockerfile">FROM alpine:latest
+        <pre><code>FROM alpine:latest
 
 # Consumed agurments from host machine
 ARG PARENT_USER

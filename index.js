@@ -122,7 +122,7 @@ function main() {
     tagsContent = Object.keys(cacher.tags)
       .map((i) => `<span class="article-tag"><a href="tag-${generateID(i)}.html">${i}</a></span>`)
       .sort()
-      .join('<br/>\n');
+      .join('\n');
     categoriesContent = Object.keys(cacher.categories)
       .map((i) => `<span class="article-category"><a href="category-${generateID(i)}.html">${i}</a></span>`)
       .sort()

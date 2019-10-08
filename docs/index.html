@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="assets/styles/basic.css">
     <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
     <script src="assets/highlight.pack.js"></script>
-    <title>Home - aBlog</title>
+    <title>F*K Guru - aBlog</title>
   </head>
 
   <body>
@@ -18,140 +18,39 @@
       <div class="page-tool">
         <h2>Categories</h2>
         <div>
-          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
-          <span class="article-category"><a href="category-blockchain.html">Blockchain</a></span><br />
-          <span class="article-category"><a href="category-cryptography.html">Cryptography</a></span><br />
-          <span class="article-category"><a href="category-docker.html">Docker</a></span><br />
-          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
-          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
-        </div>
-        <h2>Tags</h2>
-        <div>
-          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span>
-          <span class="article-tag"><a href="tag-blockchain.html">blockchain</a></span>
-          <span class="article-tag"><a href="tag-c.html">c</a></span>
-          <span class="article-tag"><a href="tag-cryptography.html">cryptography</a></span>
-          <span class="article-tag"><a href="tag-docker.html">docker</a></span>
-          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span>
-          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span>
-          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
-          <span class="article-tag"><a href="tag-typescript.html">typescript</a></span>
+          <ul>
+            <li>Cryptography<ul>
+                <li><a alt="Onward in XOR cipher" href="onward-in-xor-cipher.html">Onward in XOR cipher</a></li>
+                <li><a alt="Xorshift based pseudo random" href="xorshift-based-pseudo-random.html">Xorshift based pseudo random</a></li>
+              </ul>
+            </li>
+            <li>DevOps<ul>
+                <li><a alt="Run go Ethereum in docker container without root" href="run-go-ethereum-in-docker-container-without-root.html">Run go Ethereum in docker container without root</a></li>
+              </ul>
+            </li>
+            <li>Programming<ul>
+                <li>C<ul>
+                    <li><a alt="Capture TCP Traffic" href="capture-tcp-traffic.html">Capture TCP Traffic</a></li>
+                    <li><a alt="Programming with libpcap" href="programming-with-libpcap.html">Programming with libpcap</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
       <div class="page-content">
-        <h1 id="rungoethereuminsideacontainerwithnonrootuser">Run go Ethereum inside a container with non-root user</h1>
-        <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
-        <h2 id="dockercompose">Docker compose</h2>
-        <p><code>docker-compose.yml</code> is quite familiar to start a docker project.</p>
-        <pre><code>version: "3.7"
-services:
-  geth:
-    image: my-geth:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    user: "smart-ass"
-    volumes:
-      - ./data/:/home/smart-ass/data/:rw
-</code></pre>
-        <p>In this configuration, I'm going to map my current directory <code>./data/</code> into <code>/home/smart-ass/data</code>, just want to make sure I won't lost my synchronization even I start a new container.</p>
-        <h2 id="writingascripttostartdockercompose">Writing a script to start docker-compose</h2>
-        <p>This script will create a user named <code>smart-ass</code> belong to <code>smart-ass</code> group and passed arguments from host to the container.</p>
-        <pre><code class="sh language-sh">#!/usr/bin/env sh
-
-PARENT_USER=smart-ass
-PARENT_UID=1988
-PARENT_GROUP=smart-ass
-PARENT_GID=1988
-
-# Creating smart ass user and group
-getent group smart-ass 
-if [ $? -eq 2 ]; then
-    sudo groupadd -g 1988 smart-ass
-    sudo useradd -M -g smart-ass -u 1988 smart-ass
-fi
-
-# Create folder if not existed
-if [ ! -d "./data/" ]; then
-  sudo mkdir ./data/
-fi
-
-# Changing owner ship of data folder
-sudo chown ${PARENT_USER}:${PARENT_GROUP} -R ./data/
-sudo chmod 755 -R ./data/
-
-# Start docker build with argument
-sudo docker-compose build \
-    --build-arg PARENT_USER=${PARENT_USER} \
-    --build-arg PARENT_UID=${PARENT_UID} \
-    --build-arg PARENT_GROUP=${PARENT_GROUP} \
-    --build-arg PARENT_GID=${PARENT_GID}
-</code></pre>
-        <p>User's id and group's id were specified as a unique number <code>1988</code>. Let's take a look inside <code>Dockerfile</code></p>
-        <h2 id="dockerfile">Dockerfile</h2>
-        <p><a href="https://alpinelinux.org/">Alpine Linux</a> is good choice to begin with, <code>geth</code> is also supported by default that's make my job easier.</p>
-        <pre><code>FROM alpine:latest
-
-# Consumed agurments from host machine
-ARG PARENT_USER
-ARG PARENT_UID
-ARG PARENT_GROUP
-ARG PARENT_GID
-
-# Define home folder
-ENV HOME=/home/${PARENT_USER}
-
-# Install geth
-# Add `smart-ass` group
-# Add `smart-ass` user
-# UID and GID is the same to host machine, we just want to make sure host's data is accessible to container's user
-RUN apk add geth \
-    &amp;&amp; addgroup -g ${PARENT_GID} ${PARENT_GROUP} \
-    &amp;&amp; adduser -D -u ${PARENT_UID} -G ${PARENT_GROUP} -h ${HOME} ${PARENT_USER}
-
-WORKDIR ${HOME}
-
-COPY ./docker-script.sh ./docker-script.sh
-
-RUN chown ${PARENT_USER}:${PARENT_USER} ./docker-script.sh \
-    &amp;&amp; chmod a+x ./docker-script.sh
-
-USER ${PARENT_USER}
-
-# Is required to discover ethereum nodes
-EXPOSE 30303/tcp 30303/udp
-
-CMD ["./docker-script.sh"]
-</code></pre>
-        <p>The golden rule is, <em>"don't run with root privilege"</em>.</p>
-        <h2 id="startupcommand">Startup command</h2>
-        <p>I want to run serveral commands during container boot up so I created <code>./docker-script.sh</code>:</p>
-        <pre><code class="sh language-sh">#!/usr/bin/env sh
-
-container_info=`id`
-echo "Container info: ${container_info}"
-echo "Test write to data folder:"
-ls -la ${HOME}/data/
-date &gt; ${HOME}/data/test-write.txt
-cat ${HOME}/data/test-write.txt
-geth --datadir ${HOME}/data --rinkeby --syncmode "light"
-</code></pre>
-        <h3 id="rundockerwithoutdockercompose">Rundocker without <code>docker-compose</code></h3>
-        <pre><code>docker run -v $(pwd)/data/:/home/smart-ass/data -ti --rm my-geth:latest
-</code></pre>
-        <h2 id="conclusion">Conclusion</h2>
+        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
+        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
+        <h2 id="hashfunction">Hash function</h2>
+        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
+        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
+        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
+        <h2 id="implementation">Implementation</h2>
         <ul>
-          <li>The golden rule is, <em>"don't run with root privilege"</em>.</li>
-          <li>Docker container was started with non-root user</li>
-          <li><code>./data/geth.ipc</code> was accessible from inside and outside of docker container.</li>
-          <li><a href="https://web3js.readthedocs.io/en/1.0/web3.html#providers">IPCProvider</a> is providing impresive performance</li>
-          <li>You could run with current user by changing these lines:</li>
-        </ul>
-        <pre><code class="sh language-sh">PARENT_USER=$(id -u)
-PARENT_UID=$(id -nu ${PARENT_USER})
-PARENT_GROUP=$(id -ng ${PARENT_USER})
-PARENT_GID=$(id -g ${PARENT_USER})
-</code></pre></br>
+          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
+          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
+        </ul><br />
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
         <p>Before you read this article, <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
@@ -396,8 +295,194 @@ void packet_handler(
 00000220:   1A 60 5A 94  B3 83 22 EB  F3 60 98 24  54 8F FB 94    .`Z..."..`.$T...
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
-</code></pre></br>
-        <h1 id="xorshiftbasedpseudorandom">Xorshift based pseudo random</h1>
+</code></pre><br />
+        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
+        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
+        <h2 id="installdevelopmentenvironment">Install development environment</h2>
+        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
+        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
+</code></pre>
+        <p><code>libpcap-devel</code> is required, of course.</p>
+        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
+        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;pcap.h&gt;
+
+int main()
+{
+  pcap_if_t *alldevs;
+  pcap_if_t *d;
+  int i = 0;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* Retrieve the device list from the local machine */
+  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
+  {
+    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    return 0;
+  }
+
+  /* Print the list */
+  for (d = alldevs; d != NULL; d = d-&gt;next)
+  {
+    printf("%d. %s", ++i, d-&gt;name);
+    if (d-&gt;description)
+      printf(" (%s)\n", d-&gt;description);
+    else
+      printf(" (No description available)\n");
+  }
+
+  if (i == 0)
+  {
+    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
+    return 1;
+  }
+
+  /* Free device list */
+  pcap_freealldevs(alldevs);
+}
+</code></pre>
+        <h2 id="compileandrun">Compile and run</h2>
+        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
+        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
+</code></pre>
+        <p>Result:</p>
+        <pre><code>1. enp3s0 (No description available)
+2. lo (No description available)
+3. any (Pseudo-device that captures on all interfaces)
+4. virbr0 (No description available)
+5. bluetooth-monitor (Bluetooth Linux Monitor)
+6. nflog (Linux netfilter log (NFLOG) interface)
+7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
+8. bluetooth0 (Bluetooth adapter number 0)
+9. usbmon0 (All USB buses)
+10. wlo1 (No description available)
+11. usbmon1 (USB bus number 1)
+12. usbmon2 (USB bus number 2)
+13. virbr0-nic (No description available)
+</code></pre>
+        <p><a href="https://fkguru.com/0004-capture-all-tcp-traffic.html">Capture all TCP traffic </a>.</p>
+        <h2 id="credits">Credits</h2>
+        <p>Thanks to these guys,</p>
+        <ul>
+          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
+          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
+          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
+        </ul><br />
+        <h1 id="rungoethereuminsideacontainerwithnonrootuser">Run go Ethereum inside a container with non-root user</h1>
+        <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
+        <h2 id="dockercompose">Docker compose</h2>
+        <p><code>docker-compose.yml</code> is quite familiar to start a docker project.</p>
+        <pre><code>version: "3.7"
+services:
+  geth:
+    image: my-geth:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "smart-ass"
+    volumes:
+      - ./data/:/home/smart-ass/data/:rw
+</code></pre>
+        <p>In this configuration, I'm going to map my current directory <code>./data/</code> into <code>/home/smart-ass/data</code>, just want to make sure I won't lost my synchronization even I start a new container.</p>
+        <h2 id="writingascripttostartdockercompose">Writing a script to start docker-compose</h2>
+        <p>This script will create a user named <code>smart-ass</code> belong to <code>smart-ass</code> group and passed arguments from host to the container.</p>
+        <pre><code class="sh language-sh">#!/usr/bin/env sh
+
+PARENT_USER=smart-ass
+PARENT_UID=1988
+PARENT_GROUP=smart-ass
+PARENT_GID=1988
+
+# Creating smart ass user and group
+getent group smart-ass 
+if [ $? -eq 2 ]; then
+    sudo groupadd -g 1988 smart-ass
+    sudo useradd -M -g smart-ass -u 1988 smart-ass
+fi
+
+# Create folder if not existed
+if [ ! -d "./data/" ]; then
+  sudo mkdir ./data/
+fi
+
+# Changing owner ship of data folder
+sudo chown ${PARENT_USER}:${PARENT_GROUP} -R ./data/
+sudo chmod 755 -R ./data/
+
+# Start docker build with argument
+sudo docker-compose build \
+    --build-arg PARENT_USER=${PARENT_USER} \
+    --build-arg PARENT_UID=${PARENT_UID} \
+    --build-arg PARENT_GROUP=${PARENT_GROUP} \
+    --build-arg PARENT_GID=${PARENT_GID}
+</code></pre>
+        <p>User's id and group's id were specified as a unique number <code>1988</code>. Let's take a look inside <code>Dockerfile</code></p>
+        <h2 id="dockerfile">Dockerfile</h2>
+        <p><a href="https://alpinelinux.org/">Alpine Linux</a> is good choice to begin with, <code>geth</code> is also supported by default that's make my job easier.</p>
+        <pre><code>FROM alpine:latest
+
+# Consumed agurments from host machine
+ARG PARENT_USER
+ARG PARENT_UID
+ARG PARENT_GROUP
+ARG PARENT_GID
+
+# Define home folder
+ENV HOME=/home/${PARENT_USER}
+
+# Install geth
+# Add `smart-ass` group
+# Add `smart-ass` user
+# UID and GID is the same to host machine, we just want to make sure host's data is accessible to container's user
+RUN apk add geth \
+    &amp;&amp; addgroup -g ${PARENT_GID} ${PARENT_GROUP} \
+    &amp;&amp; adduser -D -u ${PARENT_UID} -G ${PARENT_GROUP} -h ${HOME} ${PARENT_USER}
+
+WORKDIR ${HOME}
+
+COPY ./docker-script.sh ./docker-script.sh
+
+RUN chown ${PARENT_USER}:${PARENT_USER} ./docker-script.sh \
+    &amp;&amp; chmod a+x ./docker-script.sh
+
+USER ${PARENT_USER}
+
+# Is required to discover ethereum nodes
+EXPOSE 30303/tcp 30303/udp
+
+CMD ["./docker-script.sh"]
+</code></pre>
+        <p>The golden rule is, <em>"don't run with root privilege"</em>.</p>
+        <h2 id="startupcommand">Startup command</h2>
+        <p>I want to run serveral commands during container boot up so I created <code>./docker-script.sh</code>:</p>
+        <pre><code class="sh language-sh">#!/usr/bin/env sh
+
+container_info=`id`
+echo "Container info: ${container_info}"
+echo "Test write to data folder:"
+ls -la ${HOME}/data/
+date &gt; ${HOME}/data/test-write.txt
+cat ${HOME}/data/test-write.txt
+geth --datadir ${HOME}/data --rinkeby --syncmode "light"
+</code></pre>
+        <h3 id="rundockerwithoutdockercompose">Rundocker without <code>docker-compose</code></h3>
+        <pre><code>docker run -v $(pwd)/data/:/home/smart-ass/data -ti --rm my-geth:latest
+</code></pre>
+        <h2 id="conclusion">Conclusion</h2>
+        <ul>
+          <li>The golden rule is, <em>"don't run with root privilege"</em>.</li>
+          <li>Docker container was started with non-root user</li>
+          <li><code>./data/geth.ipc</code> was accessible from inside and outside of docker container.</li>
+          <li><a href="https://web3js.readthedocs.io/en/1.0/web3.html#providers">IPCProvider</a> is providing impresive performance</li>
+          <li>You could run with current user by changing these lines:</li>
+        </ul>
+        <pre><code class="sh language-sh">PARENT_USER=$(id -u)
+PARENT_UID=$(id -nu ${PARENT_USER})
+PARENT_GROUP=$(id -ng ${PARENT_USER})
+PARENT_GID=$(id -g ${PARENT_USER})
+</code></pre><br />
+        <h1 id="xorshiftbasedpseudorandom">XorShift based pseudo random</h1>
         <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspired me to create another kind of <code>Xorshift</code> based without static initial.</p>
         <p>The basic concept is:</p>
         <ul>
@@ -483,155 +568,6 @@ int main(){
           <li>The result is predictable within disclosed <code>seed</code></li>
           <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
           <li>It isn't safe for cryptography purpose</li>
-        </ul></br>
-        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
-        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
-        <h2 id="hashfunction">Hash function</h2>
-        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
-        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
-        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
-        <h2 id="implementation">Implementation</h2>
-        <ul>
-          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
-          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
-        </ul></br>
-        <h1 id="iandiwhichisfasterwitharrayoperator">I++ and I-- which is faster with array operator?</h1>
-        <p>My friend gave me a link on Youtube <a href="https://www.youtube.com/watch?v=aUfOeDXE9Rk">why i-- for loop is faster than i++ with arrays in JavaScript</a>. The guy who was create this video is some kind of dumb ass. He's not event know how does <code>Node.JS</code> or <code>Javascript</code> work.</p>
-        <h2 id="letrepeathisexperiment">Let repeat his experiment</h2>
-        <p>I wrote a simple code with <code>i++</code> then append <code>i</code> in to an <code>Array</code>:</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 175 μs
-</code></pre>
-        <p>Let try the same with <code>i--</code>:</p>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 175 μs
-</code></pre>
-        <p>Wow, it's the same, why the hell it happened?.</p>
-        <h2 id="letrepeatthedumbassexperiment">Let repeat the dumb ass experiment</h2>
-        <pre><code class="js language-js">let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-
-let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I-- cost: 197 μs
-I++ cost: 202 μs
-</code></pre>
-        <p>The result shown, <code>I--</code> quite faster than <code>I++</code> when I let it on the top then let do in reverse.</p>
-        <pre><code class="js language-js">let a = [];
-let s = Date.now()
-for (let i = 0; i &lt; 10000000; i++) {
-  a.push(i);
-}
-console.log('I++ cost:', Date.now() - s, 'μs');
-
-let b = [];
-let c = Date.now()
-for (let i = 10000000; i &gt; 0; i--) {
-  b.push(i);
-}
-console.log('I-- cost:', Date.now() - c, 'μs');
-</code></pre>
-        <p>Result:</p>
-        <pre><code>I++ cost: 195 μs
-I-- cost: 205 μs
-</code></pre>
-        <p>Oh! see, <code>V8 Engine</code> have some kind pre-processing for initial code on the top. That's why this dumb ass orbserve and do stupid experiment.</p></br>
-        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
-        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
-        <h2 id="installdevelopmentenvironment">Install development environment</h2>
-        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
-        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
-</code></pre>
-        <p><code>libpcap-devel</code> is required, of course.</p>
-        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
-        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;pcap.h&gt;
-
-int main()
-{
-  pcap_if_t *alldevs;
-  pcap_if_t *d;
-  int i = 0;
-  char errbuf[PCAP_ERRBUF_SIZE];
-
-  /* Retrieve the device list from the local machine */
-  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
-  {
-    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
-    return 0;
-  }
-
-  /* Print the list */
-  for (d = alldevs; d != NULL; d = d-&gt;next)
-  {
-    printf("%d. %s", ++i, d-&gt;name);
-    if (d-&gt;description)
-      printf(" (%s)\n", d-&gt;description);
-    else
-      printf(" (No description available)\n");
-  }
-
-  if (i == 0)
-  {
-    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
-    return 1;
-  }
-
-  /* Free device list */
-  pcap_freealldevs(alldevs);
-}
-</code></pre>
-        <h2 id="compileandrun">Compile and run</h2>
-        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
-        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
-</code></pre>
-        <p>Result:</p>
-        <pre><code>1. enp3s0 (No description available)
-2. lo (No description available)
-3. any (Pseudo-device that captures on all interfaces)
-4. virbr0 (No description available)
-5. bluetooth-monitor (Bluetooth Linux Monitor)
-6. nflog (Linux netfilter log (NFLOG) interface)
-7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
-8. bluetooth0 (Bluetooth adapter number 0)
-9. usbmon0 (All USB buses)
-10. wlo1 (No description available)
-11. usbmon1 (USB bus number 1)
-12. usbmon2 (USB bus number 2)
-13. virbr0-nic (No description available)
-</code></pre>
-        <p><a href="https://fkguru.com/0004-capture-all-tcp-traffic.html">Capture all TCP traffic </a>.</p>
-        <h2 id="credits">Credits</h2>
-        <p>Thanks to these guys,</p>
-        <ul>
-          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
-          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
-          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
         </ul>
       </div>
     </div>
@@ -643,6 +579,10 @@ int main()
         hljs.highlightBlock(block);
       });
     });
+    let imgs = document.querySelectorAll('img');
+    for (let i = 0; i < imgs.length; i++) {
+      imgs[i].parentElement.align = 'center';
+    }
   </script>
 
 </html>

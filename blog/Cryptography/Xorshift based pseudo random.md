@@ -1,11 +1,4 @@
----
-title: Xorshift based pseudo random
-date: Sat Apr 13 21:12:41 +07 2019
-categories: Random Number Generator, Algorithm
-tags: prng, algorithm
----
-
-# Xorshift based pseudo random
+# XorShift based pseudo random
 
 This paper [Xorshift RNGs, July 2003, Marsaglia, George](https://www.jstatsoft.org/v08/i14/paper) was inspired me to create another kind of `Xorshift` based without static initial.
 

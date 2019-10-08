@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node index.js && git add ./docs/* ./blog/* && git commit -a -m \"Update blog\" && git push",
+    "start": "rm -f ./docs/*.html && node index.js && git add ./docs/* ./blog/* && git commit -a -m \"Update blog\" && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

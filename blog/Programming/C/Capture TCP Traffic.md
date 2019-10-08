@@ -1,65 +1,33 @@
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+# Capture TCP Traffic
 
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="assets/styles/basic.css">
-    <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
-    <script src="assets/highlight.pack.js"></script>
-    <title>Capture TCP Traffic - aBlog</title>
-  </head>
+Before you read this article, [Programing with pcap](https://fkguru.com/0003-programing-with-pcap.html).
 
-  <body>
-    <div class="forkme">
-      <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
-        <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
-      </a>
-    </div>
-    <div class="page">
-      <div class="page-tool">
-        <h2>Categories</h2>
-        <div>
-          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
-          <span class="article-category"><a href="category-blockchain.html">Blockchain</a></span><br />
-          <span class="article-category"><a href="category-cryptography.html">Cryptography</a></span><br />
-          <span class="article-category"><a href="category-docker.html">Docker</a></span><br />
-          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
-          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
-        </div>
-        <h2>Tags</h2>
-        <div>
-          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span>
-          <span class="article-tag"><a href="tag-blockchain.html">blockchain</a></span>
-          <span class="article-tag"><a href="tag-c.html">c</a></span>
-          <span class="article-tag"><a href="tag-cryptography.html">cryptography</a></span>
-          <span class="article-tag"><a href="tag-docker.html">docker</a></span>
-          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span>
-          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span>
-          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
-          <span class="article-tag"><a href="tag-typescript.html">typescript</a></span>
-        </div>
-      </div>
-      <div class="page-content">
-        <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
-        <p>Before you read this article, <a href="https://fkguru.com/0003-programing-with-pcap.html">Programing with pcap</a>.</p>
-        <h2 id="dumpbinarydata">Dump binary data</h2>
-        <p>I wrote some methods to help me observer the result form memory, all these thing better to print in friendly hexadecimal.</p>
-        <pre><code>00000000:   8A 17 03 03  00 5D 00 00  00 00 00 00  00 BD 2E 02    .....]..........
+## Dump binary data
+
+I wrote some methods to help me observer the result form memory, all these thing better to print in friendly hexadecimal.
+
+```
+00000000:   8A 17 03 03  00 5D 00 00  00 00 00 00  00 BD 2E 02    .....]..........
 00000020:   94 FE 87 9F  2B 5E 57 F9  5E 95 F9 76  3F 2C 02 A0    ....+^W.^..v?,..
-00000040:   66 66 38 3E  03 B5 FD 2C  BB 6C 9F 87  39 30 3A B4    ff8&gt;...,.l..90:.
+00000040:   66 66 38 3E  03 B5 FD 2C  BB 6C 9F 87  39 30 3A B4    ff8>...,.l..90:.
 00000060:   A4 E5 82 80  BF 02 97 C6  2C C6 52 1B  20 3A F7 C9    ........,.R. :..
 00000080:   47 A0 A6 E4  B4 FA 62 40  3A B6 32 1E  DB 7B 12 CC    G.....b@:.2..{..
 000000A0:   A6 34 1C 92  67 C3 4D 7E  5E 87 79 AE  37 50 E8 A1    .4..g.M~^.y.7P..
 000000C0:   08 62                                                 .b
-</code></pre>
-        <p>It's pretty cool, right?</p>
-        <h3 id="methodstoprintbinarylikeabove">Methods to print binary like above</h3>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;pcap.h&gt;
-#include &lt;string.h&gt;
-#include &lt;time.h&gt;
-#include &lt;netinet/in.h&gt;
-#include &lt;netinet/if_ether.h&gt;
+```
+
+It's pretty cool, right?
+
+### Methods to print binary like above
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pcap.h>
+#include <string.h>
+#include <time.h>
+#include <netinet/in.h>
+#include <netinet/if_ether.h>
 
 #define LENGTH_BUFFER 255
 #define LENGTH_HEX 62
@@ -107,13 +75,13 @@ void brintf(void *data, size_t offset, size_t len)
   //Clearn character buffer
   memset(charBuffer, 0x00, LENGTH_BUFFER);
 
-  for (int c = 0; c &lt; len; c++)
+  for (int c = 0; c < len; c++)
   {
     // AND with 0xff to make sure we have pure char
-    tmp = 0xff &amp; dataPointer[c];
+    tmp = 0xff & dataPointer[c];
     sprintf(hexBuffer, "%X", tmp);
     //Only show printable
-    charBuffer[i++] = (tmp &gt;= 32 &amp;&amp; tmp &lt;= 126) ? tmp : '.';
+    charBuffer[i++] = (tmp >= 32 && tmp <= 126) ? tmp : '.';
     if (strlen(hexBuffer) == 1)
     {
       hexBuffer[1] = hexBuffer[0];
@@ -126,11 +94,11 @@ void brintf(void *data, size_t offset, size_t len)
     }
     strcat(buffer, hexBuffer);
     size_t bl = strlen(buffer);
-    if (bl &gt;= LENGTH_HEX || c == len - 1)
+    if (bl >= LENGTH_HEX || c == len - 1)
     {
       i = 0;
       s += 32;
-      if (bl &lt; LENGTH_HEX)
+      if (bl < LENGTH_HEX)
       {
         char *tmpBuffer = repeat(' ', LENGTH_HEX - bl);
         strcat(buffer, tmpBuffer);
@@ -146,17 +114,22 @@ void brintf(void *data, size_t offset, size_t len)
     }
   }
 }
-</code></pre>
-        <p><code>brintf</code> takes three argurments:</p>
-        <pre><code class="c language-c">void brintf(void *data, size_t offset, size_t len);
-</code></pre>
-        <ul>
-          <li><code>data</code>: data pointer</li>
-          <li><code>offset</code>: offset of beginning of data</li>
-          <li><code>len</code>: data size</li>
-        </ul>
-        <h2 id="writecapturecode">Write capture code:</h2>
-        <pre><code class="c language-c">void packet_handler(
+```
+
+`brintf` takes three argurments:
+
+```c
+void brintf(void *data, size_t offset, size_t len);
+```
+
+- `data`: data pointer
+- `offset`: offset of beginning of data
+- `len`: data size
+
+## Write capture code:
+
+```c
+void packet_handler(
     u_char *args,
     const struct pcap_pkthdr *header,
     const u_char *packet);
@@ -174,7 +147,7 @@ int main(int argc, char *argv[])
   int timeout_limit = 10000; // In milliseconds
 
   // Retrieve the device list from the local machine
-  if (pcap_findalldevs(&amp;alldevs, error_buffer) == -1)
+  if (pcap_findalldevs(&alldevs, error_buffer) == -1)
   {
     fprintf(stderr, "Error in pcap_findalldevs: %s\n", error_buffer);
     return 1;
@@ -187,10 +160,10 @@ int main(int argc, char *argv[])
   }
 
   //Seet device as first device found
-  device = alldevs-&gt;name;
+  device = alldevs->name;
 
   // Find the properties for the device
-  if (pcap_lookupnet(device, &amp;net, &amp;mask, error_buffer) == -1)
+  if (pcap_lookupnet(device, &net, &mask, error_buffer) == -1)
   {
     fprintf(stderr, "Couldn't get netmask for device %s: %s\n", device, error_buffer);
     net = 0;
@@ -211,14 +184,14 @@ int main(int argc, char *argv[])
   }
 
   // Compile and apply the filter
-  if (pcap_compile(handle, &amp;fp, filter_exp, 0, net) == -1)
+  if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1)
   {
     fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
     return 4;
   }
 
   // Set filter
-  if (pcap_setfilter(handle, &amp;fp) == -1)
+  if (pcap_setfilter(handle, &fp) == -1)
   {
     fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
     return 5;
@@ -235,22 +208,28 @@ void packet_handler(
     const u_char *packet_body)
 {
   //Make sure it's TCP/IP
-  if (packet_header-&gt;len &gt; 66)
+  if (packet_header->len > 66)
   {
     printf("\n");
     //Print TCP payload
-    brintf((void *)packet_body, 65, packet_header-&gt;len - 66);
+    brintf((void *)packet_body, 65, packet_header->len - 66);
   }
   return;
 }
-</code></pre>
-        <h3 id="compileandexecute">Compile and execute:</h3>
-        <pre><code>gcc ./main.c -lpcap -o ./main &amp;&amp; sudo ./main
-</code></pre>
-        <p>Result:</p>
-        <pre><code>00000000:   50 66 4C F0  3A C5 EB C9  57 55 3E 63  07 3D 6A 9F    PfL.:...WU&gt;c.=j.
+```
+
+### Compile and execute:
+
+```
+gcc ./main.c -lpcap -o ./main && sudo ./main
+```
+
+Result:
+
+```
+00000000:   50 66 4C F0  3A C5 EB C9  57 55 3E 63  07 3D 6A 9F    PfL.:...WU>c.=j.
 00000020:   A1 0B E0 31  F8 4D 43 D3  ED 5B F7 A7  4B 81 8E 5D    ...1.MC..[..K..]
-00000040:   58 95 7D 91  24 AF 1B 57  CD 3E 50 5B  48 9B BF 77    X.}.$..W.&gt;P[H..w
+00000040:   58 95 7D 91  24 AF 1B 57  CD 3E 50 5B  48 9B BF 77    X.}.$..W.>P[H..w
 00000060:   E3 EA 9F 1E  49 01 3F 54  25 1B F8 F1  15 62 10 C5    ....I.?T%....b..
 00000080:   D9 61 F0 1F  2B A2 58 E2  AC B8 69 E2  1B E2 08 CF    .a..+.X...i.....
 000000A0:   BB 08 E8 6D  82 5F 6D F6  2B 5E 98 1D  D3 65 66 10    ...m._m.+^...ef.
@@ -269,8 +248,8 @@ void packet_handler(
 00000060:   74 AE A2 77  7D B2 B7 03  AE 63 62 7A  63 27 9B 69    t..w}....cbzc'.i
 00000080:   15 FB 69 95  97 76 CC 98  4B 7F 8E FC  B5 46 ED 9A    ..i..v..K....F..
 000000A0:   59 88 65 29  7D D7 F7 4D  C2 0E D2 B3  D4 3B 70 BF    Y.e)}..M.....;p.
-000000C0:   AB 6B 33 82  70 A1 3E 53  CF 48 2D EE  47 E6 D4 D6    .k3.p.&gt;S.H-.G...
-000000E0:   E4 D2 26 07  F4 E0 82 A7  AE 96 2F 6F  A8 E0 CE C3    ..&amp;......./o....
+000000C0:   AB 6B 33 82  70 A1 3E 53  CF 48 2D EE  47 E6 D4 D6    .k3.p.>S.H-.G...
+000000E0:   E4 D2 26 07  F4 E0 82 A7  AE 96 2F 6F  A8 E0 CE C3    ..&......./o....
 00000100:   C7 74 3B C1  27 8A A1 00  22 58 11 05  1E 6B 07 A7    .t;.'..."X...k..
 00000120:   0E 63 D6 AC  C4 E0 66 F0  88 48 FD 1D  63 8D 11 80    .c....f..H..c...
 00000140:   00 5F 9D 9E  03 A1 98 A1  E8 BF 81 5F  54 1B 10 04    ._........._T...
@@ -278,22 +257,9 @@ void packet_handler(
 00000180:   6F 98 81 A5  39 86 A4 C9  FE 21 45 73  0A 46 17 51    o...9....!Es.F.Q
 000001A0:   EA AC 10 4A  09 CD 8E DD  7F DF AF BE  C3 1F AA 9A    ...J............
 000001C0:   EE 63 C2 3F  0F 43 FA 5A  53 F4 EA D1  7E 8A 6D 0B    .c.?.C.ZS...~.m.
-000001E0:   11 C8 A6 FC  F1 F6 BC 95  05 2C 3C 25  27 22 CD 27    .........,&lt;%'".'
-00000200:   F9 82 99 70  3E 00 86 80  1F 24 B4 63  E9 CF 93 30    ...p&gt;....$.c...0
+000001E0:   11 C8 A6 FC  F1 F6 BC 95  05 2C 3C 25  27 22 CD 27    .........,<%'".'
+00000200:   F9 82 99 70  3E 00 86 80  1F 24 B4 63  E9 CF 93 30    ...p>....$.c...0
 00000220:   1A 60 5A 94  B3 83 22 EB  F3 60 98 24  54 8F FB 94    .`Z..."..`.$T...
-00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
+00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    >.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
-</code></pre>
-      </div>
-    </div>
-    <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
-  </body>
-  <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', (event) => {
-      document.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightBlock(block);
-      });
-    });
-  </script>
-
-</html>
+```

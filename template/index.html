@@ -21,10 +21,6 @@
       <div>
         ${categories}
       </div>
-      <h2>Tags</h2>
-      <div>
-        ${tags}
-      </div>
     </div>
     <div class="page-content">
       ${content}
@@ -38,6 +34,10 @@
       hljs.highlightBlock(block);
     });
   });
+  let imgs = document.querySelectorAll('img');
+  for(let i = 0; i < imgs.length; i++){
+    imgs[i].parentElement.align = 'center';
+  }
 </script>
 
 </html>

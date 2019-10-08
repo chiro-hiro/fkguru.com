@@ -18,24 +18,25 @@
       <div class="page-tool">
         <h2>Categories</h2>
         <div>
-          <span class="article-category"><a href="category-algorithm.html">Algorithm</a></span><br />
-          <span class="article-category"><a href="category-blockchain.html">Blockchain</a></span><br />
-          <span class="article-category"><a href="category-cryptography.html">Cryptography</a></span><br />
-          <span class="article-category"><a href="category-docker.html">Docker</a></span><br />
-          <span class="article-category"><a href="category-programing.html">Programing</a></span><br />
-          <span class="article-category"><a href="category-random-number-generator.html">Random Number Generator</a></span>
-        </div>
-        <h2>Tags</h2>
-        <div>
-          <span class="article-tag"><a href="tag-algorithm.html">algorithm</a></span>
-          <span class="article-tag"><a href="tag-blockchain.html">blockchain</a></span>
-          <span class="article-tag"><a href="tag-c.html">c</a></span>
-          <span class="article-tag"><a href="tag-cryptography.html">cryptography</a></span>
-          <span class="article-tag"><a href="tag-docker.html">docker</a></span>
-          <span class="article-tag"><a href="tag-javascript.html">javascript</a></span>
-          <span class="article-tag"><a href="tag-pcap.html">pcap</a></span>
-          <span class="article-tag"><a href="tag-prng.html">prng</a></span>
-          <span class="article-tag"><a href="tag-typescript.html">typescript</a></span>
+          <ul>
+            <li>Cryptography<ul>
+                <li><a alt="Onward in XOR cipher" href="onward-in-xor-cipher.html">Onward in XOR cipher</a></li>
+                <li><a alt="Xorshift based pseudo random" href="xorshift-based-pseudo-random.html">Xorshift based pseudo random</a></li>
+              </ul>
+            </li>
+            <li>DevOps<ul>
+                <li><a alt="Run go Ethereum in docker container without root" href="run-go-ethereum-in-docker-container-without-root.html">Run go Ethereum in docker container without root</a></li>
+              </ul>
+            </li>
+            <li>Programming<ul>
+                <li>C<ul>
+                    <li><a alt="Capture TCP Traffic" href="capture-tcp-traffic.html">Capture TCP Traffic</a></li>
+                    <li><a alt="Programming with libpcap" href="programming-with-libpcap.html">Programming with libpcap</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
       <div class="page-content">
@@ -60,6 +61,10 @@
         hljs.highlightBlock(block);
       });
     });
+    let imgs = document.querySelectorAll('img');
+    for (let i = 0; i < imgs.length; i++) {
+      imgs[i].parentElement.align = 'center';
+    }
   </script>
 
 </html>

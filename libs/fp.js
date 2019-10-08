@@ -3,17 +3,7 @@ const path = require('path');
 const fs = require('fs');
 var colors = require('colors/safe');
 
-const std = {
-  fatal: (v) => { process.stderr.write(`${colors.red('[FATAL]')} ${v}\n`); process.exit(1); },
-  err: (v) => process.stderr.write(`${colors.red('[ERR]')} ${v}\n`),
-  warn: (v) => process.stderr.write(`${colors.yellow('[WARN]')} ${v}\n`),
-  info: (v) => process.stdout.write(`${colors.green('[INFO]')} ${v}\n`),
-};
-
-var fp = {
-  std: std,
-  colors: colors
-};
+var fp = { colors };
 
 fp.scanDir = function (scanPath, regex, filelist) {
   if (!filelist) var filelist = filelist || [];
@@ -36,5 +26,11 @@ fp.generateID = function (value) {
   return value.replace(/[^a-z\n\ 0-9]/gi, '').replace(/\ /g, '-').toLowerCase();
 }
 
+fp.std = {
+  fatal: (v) => { process.stderr.write(`${colors.red('[FATAL]')} ${v}\n`); process.exit(1); },
+  err: (v) => process.stderr.write(`${colors.red('[ERR]')} ${v}\n`),
+  warn: (v) => process.stderr.write(`${colors.yellow('[WARN]')} ${v}\n`),
+  info: (v) => process.stdout.write(`${colors.green('[INFO]')} ${v}\n`),
+};
 
 module.exports = fp;

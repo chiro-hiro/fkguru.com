@@ -1,10 +1,3 @@
----
-title: Programming with libpcap
-date: Wed Apr 24 22:18:32 +07 2019
-categories: Programing
-tags: c, pcap
----
-
 # Programming with libpcap
 
 `libpcap` is a good library to capture network traffic, It's fun to programing with `libpcap` you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with `libpcap` in the challenge of capture `TCP traffic`.

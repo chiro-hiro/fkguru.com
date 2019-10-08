@@ -81,7 +81,7 @@ Result:
 13. virbr0-nic (No description available)
 ```
 
-[Capture all TCP traffic ](https://fkguru.com/0004-capture-all-tcp-traffic.html).
+[Capture all TCP traffic ](https://fkguru.com/capture-tcp-traffic.html).
 
 ## Credits
 

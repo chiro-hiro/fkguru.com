@@ -1,6 +1,6 @@
 # Capture TCP Traffic
 
-Before you read this article, [Programing with pcap](https://fkguru.com/0003-programing-with-pcap.html).
+Before you read this article, [Programing with pcap](https://fkguru.com/programming-with-libpcap.html).
 
 ## Dump binary data
 

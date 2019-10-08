@@ -1,4 +1,4 @@
-# Run go Ethereum inside a container with non-root user
+# Run go Ethereum inside a docker container as non-root user
 
 I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of [Infura](https://infura.io/) endpoint. This article is also a experiment to have fun with Ethereum and docker container.
 

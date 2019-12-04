@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: fkguru.com
+Token: e6da6cff9c7b4187daa9bdfeb72a1fc5e566a4efd01e570f194bd6d826fe5516

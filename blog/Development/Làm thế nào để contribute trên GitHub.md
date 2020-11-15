@@ -1,3 +1,5 @@
+# Làm thế nào để contribute đúng trên GitHub
+
 **Phần lớn lập trình viên sẽ dành thời gian học tập trên hai trang nổi tiếng PornHub và GitHub. Tuy không có nhiều tư liệu bắt mắt nhưng GitHub host một lượng lớn các project open-source. Contribution sẽ là một nhu cầu tất yếu, nhưng contribute như thế nào để mọi người đều vui vẻ là câu chuyện dài với newbee.**
 
 # Giới thiệu

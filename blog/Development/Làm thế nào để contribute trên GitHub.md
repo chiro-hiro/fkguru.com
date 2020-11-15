@@ -62,7 +62,7 @@ Một số repo có thiết lập automation trong phần project nên khi bạn
 
 Ví dụ:
 
-```text
+```
 Title:
 Improve validator's method
 

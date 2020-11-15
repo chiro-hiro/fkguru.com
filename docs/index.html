@@ -2,34 +2,39 @@
 
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="assets/styles/basic.css">
-    <link rel="stylesheet" href="assets/styles/monokai-sublime.css">
+    <link rel="stylesheet" href="assets/styles/basic.css" />
+    <link rel="stylesheet" href="assets/styles/monokai-sublime.css" />
     <script src="assets/highlight.pack.js"></script>
+    <script src="assets/jquery-3.5.1.min.js"></script>
     <title>F*K Guru - aBlog</title>
   </head>
 
   <body>
     <div class="forkme">
       <a target="_blank" href="https://github.com/chiro-hiro/fkguru.com/">
-        <img width="149" height="149" src="assets/images/forkme.png" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
+        <img width="149" height="149" src="assets/images/forkme.png" style="opacity: 0.5" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" />
       </a>
     </div>
     <div class="page">
       <div class="page-tool">
         <h2>Categories</h2>
         <div>
-          <ul>
-            <li>Cryptography<ul>
+          <ul class="ul-parent-1">
+            <li class="li-parent-1">Cryptography<ul class="ul-parent-2">
                 <li><a alt="Onward in XOR cipher" href="onward-in-xor-cipher.html">Onward in XOR cipher</a></li>
                 <li><a alt="Xorshift based pseudo random" href="xorshift-based-pseudo-random.html">Xorshift based pseudo random</a></li>
               </ul>
             </li>
-            <li>DevOps<ul>
+            <li class="li-parent-1">DevOps<ul class="ul-parent-2">
                 <li><a alt="Run go Ethereum in docker container without root" href="run-go-ethereum-in-docker-container-without-root.html">Run go Ethereum in docker container without root</a></li>
               </ul>
             </li>
-            <li>Programming<ul>
-                <li>C<ul>
+            <li class="li-parent-1">Development<ul class="ul-parent-2">
+                <li><a alt="Làm thế nào để contribute trên GitHub" href="lam-the-nao-de-contribute-tren-github.html">Làm thế nào để contribute trên GitHub</a></li>
+              </ul>
+            </li>
+            <li class="li-parent-1">Programming<ul class="ul-parent-2">
+                <li class="li-parent-2">C<ul class="ul-parent-3">
                     <li><a alt="Capture TCP Traffic" href="capture-tcp-traffic.html">Capture TCP Traffic</a></li>
                     <li><a alt="Programming with libpcap" href="programming-with-libpcap.html">Programming with libpcap</a></li>
                   </ul>
@@ -126,6 +131,141 @@ int main(){
           <li>The result is predictable within disclosed <code>seed</code></li>
           <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
           <li>It isn't safe for cryptography purpose</li>
+        </ul><br />
+        <p><strong>Phần lớn lập trình viên sẽ dành thời gian học tập trên hai trang nổi tiếng PornHub và GitHub. Tuy không có nhiều tư liệu bắt mắt nhưng GitHub host một lượng lớn các project open-source. Contribution sẽ là một nhu cầu tất yếu, nhưng contribute như thế nào để mọi người đều vui vẻ là câu chuyện dài với newbee.</strong></p>
+        <h1 id="giithiu">Giới thiệu</h1>
+        <p>Việc dành thời gian để contribute cho các project open-source không hẳn là vô bổ nó giúp chúng ta hoàn thiện kỹ năng cũng như học thêm về working flow của các nhóm open-source khác nhau, từ đó improve bản thân để đạt được những milestone lớn hơn. Thậm chí với chút ít may mắn các bạn có thể được các công ty để mắt và đưa ra những offer hấp dẫn.</p>
+        <h2 id="tilaiylu">Tôi là ai đây là đâu?</h2>
+        <p>Đây là tâm lý chung của một thanh niên mới tạo account GitHub, cảm giác khá là khó hiểu khi đang hình dung xem “Wtf is happening over there?”. Sau thời gian làm quen và sử dụng GitHub thấy và project hay hay, mỗi chúng ta sẽ có ý định contribute code của mình cho các project đó.</p>
+        <p>Nhưng mọi chuyện đâu như là mơ, rào cản thứ nhất là không hiểu rõ cấu trúc project, rào cản thứ hai là ngôn ngữ, rào cản thứ ba là không quen ai, rào cản thứ tư là code sai standard hoặc sai yêu cần từ bên nhận pull request. Vậy là thay vì được chào đón, newbee bị tổng sỉ vã, chửi bới các kiểu. Điều này đôi lúc làm tổn thương và gây ra nhiều dạng ức chế và trầm cảm.</p>
+        <h2 id="hcqutoxickhng">Họ có quá toxic không?</h2>
+        <p>Sau khi pull request bị reject thì đôi khi lại tạo ra cảm giác tức tối, thậm chí người reject pull request của bạn có khi code cũng chẳng hay lắm. Nhưng cách nói chuyện thì toxic vãi. Thật ra không phải mọi người nhận pull request đều toxic, chỉ là một phần khá đông mà bạn xui xẻo gặp phải. Hoặc do bạn chưa đọc kỹ CONTRIBUTOR guide. Thường các project lớn sẽ có riêng một phần để hướng dẫn bạn tạo một pull request đảm bảo đúng tiêu chuẩn của họ.</p>
+        <h2 id="btunhthno">Bắt đầu như thế nào</h2>
+        <h3 id="1gitmodelcahlgcquynhinhousenovnamingkhng">1. Git model của họ là gì? có quy định in-house nào về naming không?</h3>
+        <h4 id="amergehayrebase">a. Merge hay rebase?</h4>
+        <p>Đây là điều bạn nên thuận trọng, team của họ có thể sẽ prefer <code>rebase</code> thay vì <code>merge</code>. Nên việc tạo pull request kèm theo một đống merge chằng chéo giữa các branches chẳng khác nào tát vào mặt họ. Một team lead nói với mình, <em>“Bọn tao prefer rebase bởi gì nó cho một history liên tục và đẹp hơn.”</em>. Mỗi team có lý do riêng nên nếu bạn tôn trọng họ thì bạn sẽ được tôn trọng.</p>
+        <p>Có một số nhóm khác thì prefer merge, các nhóm perfer merge chủ yếu chỉ quan tâm tới việc làm sao để các features được phát triển song song chứ cũng không cần hình thức lắm. Nhưng tất nhiên cũng có một số luật như, đừng bao giờ merge master vào develop… Những luật này hình thành trong quá trình development hoặc do team đó tự quy định bạn cần phải đọc.</p>
+        <h4 id="bhctobranchchomifeaturekhng">b. Họ có tạo branch cho mỗi feature không?</h4>
+        <p>Cái này tùy thuộc team, nhưng điều bạn cần làm là dùng chức năng visualization để xem git graph. Nó sẽ cho bạn thấy sự phát triển của các branch như thế nào, đâu là branch chính. Có prefix cho branch hay không?.</p>
+        <p>Chẳng hạn có nhiều team có quy định cho branch như sau:</p>
+        <p>Feature sẽ bắt đầu với <code>feature/</code> và tiếp theo sau là tên feature với underscore thay cho space.</p>
+        <p>Ví dụ: <code>feature/new_login_form</code></p>
+        <p>Và cứ như vậy chúng ta có <code>bug/</code>, <code>hotfix/</code>, <code>misc/</code>… tùy theo mục đích và sự cần thiết</p>
+        <h4 id="chcquynhtcommitmessagekhng">c. Họ có quy định đặt commit message không?</h4>
+        <p>Có rất nhiều team có quy định về commit message rất chặt chẽ, như phải có prefix <code>[feature]</code>, <code>[fix]</code>, <code>[document]</code>… Tuy nhiên có một số team lại có nhiều yêu cầu kỳ cục như: tất cả đều phải là chữ thường, và chia ở thì hiện tại đơn.</p>
+        <p>Chẳng hạn thay vì: <code>imrpoving validator's methods</code> phải là <code>improve validator's methods</code></p>
+        <p>Ngoài ra còn có những quy tắc khác như kèm theo task id hoặc issue number.</p>
+        <p>Ví dụ: <code>#23 improve validator's methods</code></p>
+        <p>Hoặc một số team màu mè hơn như sau:</p>
+        <p><code>[Improve] validator's methods #23</code></p>
+        <p>Bạn cần xerm git log để xem team đang dùng format nào và dùng cho phù hợp</p>
+        <p>Và nếu cảm thấy muốn nắm rõ hơn hãy đọc quyển này <a href="https://git-scm.com/book/en/v2">Pro Git</a>.</p>
+        <h4 id="dhcthitlpautomationchoprojectkhng">d. Họ có thiết lập automation cho project không?</h4>
+        <p>Một số repo có thiết lập automation trong phần project nên khi bạn tạo một pull request giải quyết issue #23 chẳng hạn. Người ta sẽ cần bạn thêm nội dung sau trong pull request:</p>
+        <p>Ví dụ:</p>
+        <pre><code class="text language-text">Title:
+Improve validator's method
+
+Description:
+This pull request is enhancing validation, resolve: #23
+</code></pre>
+        <p>Ngoài resolve thì nó có thể là <code>close #23</code>, <code>fix #23</code>… bạn dọc thêm <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">ở đây</a>.</p>
+        <p>Để đọc về các thiết lập automation cho project <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/configuring-automation-for-project-boards">ở đây</a>.</p>
+        <h4 id="ehcgithookkhng">e. Họ có git hook không?</h4>
+        <p>Nhiều project mình biết thì thường thêm git hook vào để kiểm tra code coverage, thực thi test, kiểm tra commit message… Việc bạn nên làm khi có githook là hãy để im nó làm việc của nó. Việc bạn sữ dụng <code>git commit --no-verify</code> là một việc làm khó có thể chấp nhận được.</p>
+        <h3 id="2chvcicd">2. Chú ý về CI/CD</h3>
+        <p>CI/CD giúp ích rất nhiều trong development cũng như đảm bảo deliver features đúng hẹn. Phần lớn các team đều có các phần để integrate với travis-ci, circle-ci… nên bạn cần xem liệu mình có cần thêm các thiết lập này để code của bạn hoạt động trên các môi trường của travis or cricle không.</p>
+        <h4 id="acodecabncpasstestcaseskhng">a. Code của bạn có pass test cases không?</h4>
+        <p>Thường thì các project đều có test suite và rất nhiều test cases để đảm bảo code quality. Do đó khi bạn thực hiện bug fix thì điều quan trọng là bạn phải pass mọi test cases. Còn trường hợp bạn thêm feature mới thì bạn phải thêm test cases cho features đó. Nó gần như là luật bất thành văn rồi.</p>
+        <h4 id="bcodecabncgimcodecoveragekhng">b. Code của bạn có giảm code coverage không?</h4>
+        <p>Code coverage có thể nói là một tiêu chí để đánh giá xem bao nhiêu bug đã được mặc áo đẹp. Các project với chỉ số coverage càng cao thì có thể nói là độ tin cậy của code càng cao. Vì phần lớn code đã pass qua các test cases. Nên khi pull request của bạn làm giảm code coverage thì không ai muốn merge nó cả.</p>
+        <h2 id="3hiuprojectvtradeoff">3. Hiểu project và trade-off</h2>
+        <p>Có một số project họ đã chấp nhận code đó là trade-off thì bạn cũng không nên cố chấp sửa nó làm gì. Vì họ cũng đã cân nhắc kha khá, nên thường các pull request đụng vào dạng code này thì ít khi được merge trừ khi nó xuất sắc.</p>
+        <h1 id="tmkt">Tạm kết</h1>
+        <p>Bài viết không dài không ngắn, mình mong các bạn tìm ra được một điều gì đó hữu ích cho bản thân và cùng cho đi nhiều hơn. Nếu bài viết này có chỗ chưa thỏa đáng hoặc sai lỗi chính tả thì các bạn nhẹ tay dùm.</p><br />
+        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
+        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
+        <h2 id="installdevelopmentenvironment">Install development environment</h2>
+        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
+        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
+</code></pre>
+        <p><code>libpcap-devel</code> is required, of course.</p>
+        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
+        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;pcap.h&gt;
+
+int main()
+{
+  pcap_if_t *alldevs;
+  pcap_if_t *d;
+  int i = 0;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* Retrieve the device list from the local machine */
+  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
+  {
+    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    return 0;
+  }
+
+  /* Print the list */
+  for (d = alldevs; d != NULL; d = d-&gt;next)
+  {
+    printf("%d. %s", ++i, d-&gt;name);
+    if (d-&gt;description)
+      printf(" (%s)\n", d-&gt;description);
+    else
+      printf(" (No description available)\n");
+  }
+
+  if (i == 0)
+  {
+    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
+    return 1;
+  }
+
+  /* Free device list */
+  pcap_freealldevs(alldevs);
+}
+</code></pre>
+        <h2 id="compileandrun">Compile and run</h2>
+        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
+        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
+</code></pre>
+        <p>Result:</p>
+        <pre><code>1. enp3s0 (No description available)
+2. lo (No description available)
+3. any (Pseudo-device that captures on all interfaces)
+4. virbr0 (No description available)
+5. bluetooth-monitor (Bluetooth Linux Monitor)
+6. nflog (Linux netfilter log (NFLOG) interface)
+7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
+8. bluetooth0 (Bluetooth adapter number 0)
+9. usbmon0 (All USB buses)
+10. wlo1 (No description available)
+11. usbmon1 (USB bus number 1)
+12. usbmon2 (USB bus number 2)
+13. virbr0-nic (No description available)
+</code></pre>
+        <p><a href="https://fkguru.com/capture-tcp-traffic.html">Capture all TCP traffic </a>.</p>
+        <h2 id="credits">Credits</h2>
+        <p>Thanks to these guys,</p>
+        <ul>
+          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
+          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
+          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
+        </ul><br />
+        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
+        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
+        <h2 id="hashfunction">Hash function</h2>
+        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
+        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
+        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
+        <h2 id="implementation">Implementation</h2>
+        <ul>
+          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
+          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
         </ul><br />
         <h1 id="rungoethereuminsideadockercontainerasnonrootuser">Run go Ethereum inside a docker container as non-root user</h1>
         <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
@@ -240,17 +380,6 @@ PARENT_UID=$(id -nu ${PARENT_USER})
 PARENT_GROUP=$(id -ng ${PARENT_USER})
 PARENT_GID=$(id -g ${PARENT_USER})
 </code></pre><br />
-        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
-        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
-        <h2 id="hashfunction">Hash function</h2>
-        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
-        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
-        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
-        <h2 id="implementation">Implementation</h2>
-        <ul>
-          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
-          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
-        </ul><br />
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
         <p>Before you read this article, <a href="https://fkguru.com/programming-with-libpcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
@@ -495,94 +624,28 @@ void packet_handler(
 00000220:   1A 60 5A 94  B3 83 22 EB  F3 60 98 24  54 8F FB 94    .`Z..."..`.$T...
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
-</code></pre><br />
-        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
-        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
-        <h2 id="installdevelopmentenvironment">Install development environment</h2>
-        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
-        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
 </code></pre>
-        <p><code>libpcap-devel</code> is required, of course.</p>
-        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
-        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;pcap.h&gt;
-
-int main()
-{
-  pcap_if_t *alldevs;
-  pcap_if_t *d;
-  int i = 0;
-  char errbuf[PCAP_ERRBUF_SIZE];
-
-  /* Retrieve the device list from the local machine */
-  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
-  {
-    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
-    return 0;
-  }
-
-  /* Print the list */
-  for (d = alldevs; d != NULL; d = d-&gt;next)
-  {
-    printf("%d. %s", ++i, d-&gt;name);
-    if (d-&gt;description)
-      printf(" (%s)\n", d-&gt;description);
-    else
-      printf(" (No description available)\n");
-  }
-
-  if (i == 0)
-  {
-    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
-    return 1;
-  }
-
-  /* Free device list */
-  pcap_freealldevs(alldevs);
-}
-</code></pre>
-        <h2 id="compileandrun">Compile and run</h2>
-        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
-        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
-</code></pre>
-        <p>Result:</p>
-        <pre><code>1. enp3s0 (No description available)
-2. lo (No description available)
-3. any (Pseudo-device that captures on all interfaces)
-4. virbr0 (No description available)
-5. bluetooth-monitor (Bluetooth Linux Monitor)
-6. nflog (Linux netfilter log (NFLOG) interface)
-7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
-8. bluetooth0 (Bluetooth adapter number 0)
-9. usbmon0 (All USB buses)
-10. wlo1 (No description available)
-11. usbmon1 (USB bus number 1)
-12. usbmon2 (USB bus number 2)
-13. virbr0-nic (No description available)
-</code></pre>
-        <p><a href="https://fkguru.com/capture-tcp-traffic.html">Capture all TCP traffic </a>.</p>
-        <h2 id="credits">Credits</h2>
-        <p>Thanks to these guys,</p>
-        <ul>
-          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
-          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
-          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
-        </ul>
       </div>
     </div>
-    <div class="copyright">Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com</div>
+    <div class="copyright">
+      Copyright (c) 2019 - Chiro Hiro - chiro@fkguru.com
+    </div>
   </body>
   <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', (event) => {
-      document.querySelectorAll('pre code').forEach((block) => {
+    document.addEventListener("DOMContentLoaded", (event) => {
+      document.querySelectorAll("pre code").forEach((block) => {
         hljs.highlightBlock(block);
       });
     });
-    let imgs = document.querySelectorAll('img');
+    let imgs = document.querySelectorAll("img");
     for (let i = 0; i < imgs.length; i++) {
-      imgs[i].parentElement.align = 'center';
+      imgs[i].parentElement.align = "center";
     }
+  </script>
+  <script type="text/javascript">
+    $("li.li-parent-1").click(function() {
+      $(this).children().toggle();
+    });
   </script>
 
 </html>

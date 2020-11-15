@@ -1,5 +1,5 @@
-body{
-  font-family: 'Roboto', sans-serif;
+body {
+  font-family: "Roboto", sans-serif;
   font-size: 1em;
   color: white;
   background-color: #3c4444;
@@ -7,53 +7,65 @@ body{
   padding-bottom: 64px;
 }
 
-pre > code{
+pre > code {
   line-height: 1.2em;
   font-size: 1.2em;
 }
 
-code{
+code {
   color: #ff9659;
   background-color: #323738;
   padding: 2px;
   border-radius: 5px;
 }
 
-img, image {
+img,
+image {
   border-radius: 5px;
 }
 
-h1{
+li.li-parent-1 {
+  cursor: pointer;
+}
+
+ul.ul-parent-2 {
+  display: none;
+}
+
+h1 {
   font-family: Arial, Helvetica, sans-serif;
-  color: #E27D60;
+  color: #e27d60;
   text-transform: capitalize;
 }
 
-h2{
+h2 {
   font-family: Arial, Helvetica, sans-serif;
   color: #c38d9e;
   text-transform: capitalize;
 }
 
-a, a:link, a:active, a:visited {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+a,
+a:link,
+a:active,
+a:visited {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-decoration: none;
   font-size: 1em;
-  color: #41B3A3;
+  color: #41b3a3;
 }
 
-div.article-tags{
+div.article-tags {
   margin: 5px;
   padding: 5px;
 }
 
-span.article-tag{
+span.article-tag {
   text-transform: lowercase;
   padding: 5px;
   margin: 5px;
 }
 
-span.article-category{
+span.article-category {
   text-transform: capitalize;
   padding: 5px;
   margin: 5px;
@@ -61,14 +73,14 @@ span.article-category{
 
 span.article-category::before {
   content: "• ";
-  color: #E27D60;
-  font-family: 'Courier New', Courier, monospace;
+  color: #e27d60;
+  font-family: "Courier New", Courier, monospace;
   font-weight: bold;
 }
 
 .page {
   margin: auto;
-  max-width: 90%;
+  max-width: 96%;
   display: -webkit-flex; /* Safari */
   -webkit-flex-flow: row wrap; /* Safari 6.1+ */
   display: flex;
@@ -78,7 +90,7 @@ span.article-category::before {
 @media only screen and (max-width: 1000px) {
   .page {
     margin: auto;
-    max-width: 90%;
+    max-width: 96%;
     display: block;
     flex-flow: column;
     -webkit-flex-flow: column;
@@ -86,7 +98,7 @@ span.article-category::before {
 }
 
 .page-tool {
-  width: 20%;
+  width: 25%;
 }
 
 @media only screen and (max-width: 1000px) {
@@ -95,24 +107,23 @@ span.article-category::before {
   }
 }
 
-.page-content{
-  width: 80%;
+.page-content {
+  width: 75%;
 }
 
 @media only screen and (max-width: 1000px) {
-  .page-content{
+  .page-content {
     width: 100%;
   }
 }
 
-
-.forkme{
+.forkme {
   position: absolute;
   top: 0px;
   right: 0px;
 }
 
-.copyright{
+.copyright {
   width: 100%;
   position: fixed;
   text-align: center;

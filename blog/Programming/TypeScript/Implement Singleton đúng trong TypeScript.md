@@ -6,7 +6,7 @@ Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trê
 
 Singleton thì không phải nói nhiều, nó được dùng để đảm bảo performance giảm resource để cấp và khởi tạo các dynamic object. Singleton được dùng khi một object được dùng đi dùng lại nhiều lần, cho cùng một mục đích. Singleton có thể xem là vừa có ưu thế của `static` và `dynamic` object. Singleton được viết nhiều dùng nhiều mình chỉ dùng chung ý tưởng đó nhưng implement riêng cho TypeScript.
 
-```ts
+```
 // Need to cache all dynamic instance
 const instanceCache: { [key: string]: any } = {};
 
@@ -27,7 +27,7 @@ export default Singleton;
 
 Code trên chỉ là cache lại dynamic instance vào một static instance, thay vì chỉ dùng được cho một loại constructor thì nó sẽ support cho nhiều loại constructor. Tiếp theo mình viết một example class để test Singleton.
 
-```ts
+```
 import { Singleton } from './singleton';
 
 export default class TestClass {
@@ -52,7 +52,7 @@ export default class TestClass {
 
 `public static getInstance(): TestClass` là điểm đáng quan tâm ở đây, còn lại thì `TestClass` được định nghĩa hoàn toàn bình thường. Đây là cách mình viết main code:
 
-```ts
+```
 import TestClass from './testclass';
 
 const classInstance = TestClass.getInstance();
@@ -68,7 +68,7 @@ setTimeout(() => {
 
 Kết quả:
 
-```text
+```
 Thanos - 11/28/2020, 10:00:07 AM
 Thanos - 11/28/2020, 10:00:07 AM
 ```

@@ -50,404 +50,6 @@
         </div>
       </div>
       <div class="page-content">
-        <h1 id="rungoethereuminsideadockercontainerasnonrootuser">Run go Ethereum inside a docker container as non-root user</h1>
-        <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
-        <h2 id="dockercompose">Docker compose</h2>
-        <p><code>docker-compose.yml</code> is quite familiar to start a docker project.</p>
-        <pre><code>version: "3.7"
-services:
-  geth:
-    image: my-geth:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    user: "smart-ass"
-    volumes:
-      - ./data/:/home/smart-ass/data/:rw
-</code></pre>
-        <p>In this configuration, I'm going to map my current directory <code>./data/</code> into <code>/home/smart-ass/data</code>, just want to make sure I won't lost my synchronization even I start a new container.</p>
-        <h2 id="writingascripttostartdockercompose">Writing a script to start docker-compose</h2>
-        <p>This script will create a user named <code>smart-ass</code> belong to <code>smart-ass</code> group and passed arguments from host to the container.</p>
-        <pre><code class="sh language-sh">#!/usr/bin/env sh
-
-PARENT_USER=smart-ass
-PARENT_UID=1988
-PARENT_GROUP=smart-ass
-PARENT_GID=1988
-
-# Creating smart ass user and group
-getent group smart-ass 
-if [ $? -eq 2 ]; then
-    sudo groupadd -g 1988 smart-ass
-    sudo useradd -M -g smart-ass -u 1988 smart-ass
-fi
-
-# Create folder if not existed
-if [ ! -d "./data/" ]; then
-  sudo mkdir ./data/
-fi
-
-# Changing owner ship of data folder
-sudo chown ${PARENT_USER}:${PARENT_GROUP} -R ./data/
-sudo chmod 755 -R ./data/
-
-# Start docker build with argument
-sudo docker-compose build \
-    --build-arg PARENT_USER=${PARENT_USER} \
-    --build-arg PARENT_UID=${PARENT_UID} \
-    --build-arg PARENT_GROUP=${PARENT_GROUP} \
-    --build-arg PARENT_GID=${PARENT_GID}
-</code></pre>
-        <p>User's id and group's id were specified as a unique number <code>1988</code>. Let's take a look inside <code>Dockerfile</code></p>
-        <h2 id="dockerfile">Dockerfile</h2>
-        <p><a href="https://alpinelinux.org/">Alpine Linux</a> is good choice to begin with, <code>geth</code> is also supported by default that's make my job easier.</p>
-        <pre><code>FROM alpine:latest
-
-# Consumed agurments from host machine
-ARG PARENT_USER
-ARG PARENT_UID
-ARG PARENT_GROUP
-ARG PARENT_GID
-
-# Define home folder
-ENV HOME=/home/${PARENT_USER}
-
-# Install geth
-# Add `smart-ass` group
-# Add `smart-ass` user
-# UID and GID is the same to host machine, we just want to make sure host's data is accessible to container's user
-RUN apk add geth \
-    &amp;&amp; addgroup -g ${PARENT_GID} ${PARENT_GROUP} \
-    &amp;&amp; adduser -D -u ${PARENT_UID} -G ${PARENT_GROUP} -h ${HOME} ${PARENT_USER}
-
-WORKDIR ${HOME}
-
-COPY ./docker-script.sh ./docker-script.sh
-
-RUN chown ${PARENT_USER}:${PARENT_USER} ./docker-script.sh \
-    &amp;&amp; chmod a+x ./docker-script.sh
-
-USER ${PARENT_USER}
-
-# Is required to discover ethereum nodes
-EXPOSE 30303/tcp 30303/udp
-
-CMD ["./docker-script.sh"]
-</code></pre>
-        <p>The golden rule is, <em>"don't run with root privilege"</em>.</p>
-        <h2 id="startupcommand">Startup command</h2>
-        <p>I want to run serveral commands during container boot up so I created <code>./docker-script.sh</code>:</p>
-        <pre><code class="sh language-sh">#!/usr/bin/env sh
-
-container_info=`id`
-echo "Container info: ${container_info}"
-echo "Test write to data folder:"
-ls -la ${HOME}/data/
-date &gt; ${HOME}/data/test-write.txt
-cat ${HOME}/data/test-write.txt
-geth --datadir ${HOME}/data --rinkeby --syncmode "light"
-</code></pre>
-        <h3 id="rundockerwithoutdockercompose">Rundocker without <code>docker-compose</code></h3>
-        <pre><code>docker run -v $(pwd)/data/:/home/smart-ass/data -ti --rm my-geth:latest
-</code></pre>
-        <h2 id="conclusion">Conclusion</h2>
-        <ul>
-          <li>The golden rule is, <em>"don't run with root privilege"</em>.</li>
-          <li>Docker container was started with non-root user</li>
-          <li><code>./data/geth.ipc</code> was accessible from inside and outside of docker container.</li>
-          <li><a href="https://web3js.readthedocs.io/en/1.0/web3.html#providers">IPCProvider</a> is providing impresive performance</li>
-          <li>You could run with current user by changing these lines:</li>
-        </ul>
-        <pre><code class="sh language-sh">PARENT_USER=$(id -u)
-PARENT_UID=$(id -nu ${PARENT_USER})
-PARENT_GROUP=$(id -ng ${PARENT_USER})
-PARENT_GID=$(id -g ${PARENT_USER})
-</code></pre><br />
-        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
-        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
-        <h2 id="hashfunction">Hash function</h2>
-        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
-        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
-        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
-        <h2 id="implementation">Implementation</h2>
-        <ul>
-          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
-          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
-        </ul><br />
-        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
-        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
-        <h2 id="installdevelopmentenvironment">Install development environment</h2>
-        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
-        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
-</code></pre>
-        <p><code>libpcap-devel</code> is required, of course.</p>
-        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
-        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;pcap.h&gt;
-
-int main()
-{
-  pcap_if_t *alldevs;
-  pcap_if_t *d;
-  int i = 0;
-  char errbuf[PCAP_ERRBUF_SIZE];
-
-  /* Retrieve the device list from the local machine */
-  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
-  {
-    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
-    return 0;
-  }
-
-  /* Print the list */
-  for (d = alldevs; d != NULL; d = d-&gt;next)
-  {
-    printf("%d. %s", ++i, d-&gt;name);
-    if (d-&gt;description)
-      printf(" (%s)\n", d-&gt;description);
-    else
-      printf(" (No description available)\n");
-  }
-
-  if (i == 0)
-  {
-    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
-    return 1;
-  }
-
-  /* Free device list */
-  pcap_freealldevs(alldevs);
-}
-</code></pre>
-        <h2 id="compileandrun">Compile and run</h2>
-        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
-        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
-</code></pre>
-        <p>Result:</p>
-        <pre><code>1. enp3s0 (No description available)
-2. lo (No description available)
-3. any (Pseudo-device that captures on all interfaces)
-4. virbr0 (No description available)
-5. bluetooth-monitor (Bluetooth Linux Monitor)
-6. nflog (Linux netfilter log (NFLOG) interface)
-7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
-8. bluetooth0 (Bluetooth adapter number 0)
-9. usbmon0 (All USB buses)
-10. wlo1 (No description available)
-11. usbmon1 (USB bus number 1)
-12. usbmon2 (USB bus number 2)
-13. virbr0-nic (No description available)
-</code></pre>
-        <p><a href="https://fkguru.com/capture-tcp-traffic.html">Capture all TCP traffic </a>.</p>
-        <h2 id="credits">Credits</h2>
-        <p>Thanks to these guys,</p>
-        <ul>
-          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
-          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
-          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
-        </ul><br />
-        <h1 id="xorshiftbasedpseudorandom">XorShift based pseudo random</h1>
-        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspired me to create another kind of <code>Xorshift</code> based without static initial.</p>
-        <p>The basic concept is:</p>
-        <ul>
-          <li>Seeding with a initial value <code>seed</code></li>
-          <li>Repeat caculation for every bit of <code>seed</code></li>
-          <li><code>i</code> is denoted for bit <code>i th</code></li>
-          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
-          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
-          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
-        </ul>
-        <h2 id="implementation">Implementation</h2>
-        <h3 id="implementinpython">Implement in Python</h3>
-        <pre><code class="python language-python">import random
-
-seed = random.randint(0x55555555, 0xffffffff)
-
-
-def rnd():
-    global seed
-    x = 0
-    for i in range(32):
-        if (seed &gt;&gt; i) &amp; 1:
-            x ^= seed &gt;&gt; i
-        else:
-            x ^= seed &lt;&lt; i
-    x = 0xffffffff &amp; x
-    seed = x
-    return x
-
-
-for i in range(1000):
-    print rnd()
-</code></pre>
-        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
-        <pre><code class="js language-js">const crypto = require('crypto');
-
-//Generate seed randomBytes
-var seed = crypto.randomBytes(4).readUInt32LE(0);
-
-//XorShift based PRNG
-function rnd(){
-    var x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        //Shift right if [i th] bit is equal to 1, otherwise shift letf
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x &gt;&gt;&gt; 0;
-}
-
-for(let i = 0; i &lt; 1000; i++){
-  process.stdout.write(`${i}\n`)
-}
-</code></pre>
-        <h3 id="implementinc">Implement in C</h3>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;time.h&gt;
-
-unsigned int seed;
-
-unsigned int rnd(){
-    unsigned int x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x;
-}
-
-int main(){
-    time_t tsec;
-    int i = 0;
-    tsec = time(NULL);
-    seed = (unsigned int)tsec;
-    for(;i &lt; 1000; i++) printf("%u\n", rnd());
-    return 0;
-}
-</code></pre>
-        <p>Test:</p>
-        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
-</code></pre>
-        <h2 id="conclusion">Conclusion</h2>
-        <ul>
-          <li><code>0x00000000</code> and other kind of <em>poor entropy seed</em> are the worst thing to this <strong>algorithm</strong></li>
-          <li>The result is predictable within disclosed <code>seed</code></li>
-          <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
-          <li>It isn't safe for cryptography purpose</li>
-        </ul><br />
-        <h1 id="lmthnocontributengtrngithub">Làm thế nào để contribute đúng trên GitHub</h1>
-        <p><strong>Phần lớn lập trình viên sẽ dành thời gian học tập trên hai trang nổi tiếng PornHub và GitHub. Tuy không có nhiều tư liệu bắt mắt nhưng GitHub host một lượng lớn các project open-source. Contribution sẽ là một nhu cầu tất yếu, nhưng contribute như thế nào để mọi người đều vui vẻ là câu chuyện dài với newbee.</strong></p>
-        <h1 id="giithiu">Giới thiệu</h1>
-        <p>Việc dành thời gian để contribute cho các project open-source không hẳn là vô bổ nó giúp chúng ta hoàn thiện kỹ năng cũng như học thêm về working flow của các nhóm open-source khác nhau, từ đó improve bản thân để đạt được những milestone lớn hơn. Thậm chí với chút ít may mắn các bạn có thể được các công ty để mắt và đưa ra những offer hấp dẫn.</p>
-        <h2 id="tilaiylu">Tôi là ai đây là đâu?</h2>
-        <p>Đây là tâm lý chung của một thanh niên mới tạo account GitHub, cảm giác khá là khó hiểu khi đang hình dung xem “Wtf is happening over there?”. Sau thời gian làm quen và sử dụng GitHub thấy và project hay hay, mỗi chúng ta sẽ có ý định contribute code của mình cho các project đó.</p>
-        <p>Nhưng mọi chuyện đâu như là mơ, rào cản thứ nhất là không hiểu rõ cấu trúc project, rào cản thứ hai là ngôn ngữ, rào cản thứ ba là không quen ai, rào cản thứ tư là code sai standard hoặc sai yêu cần từ bên nhận pull request. Vậy là thay vì được chào đón, newbee bị tổng sỉ vã, chửi bới các kiểu. Điều này đôi lúc làm tổn thương và gây ra nhiều dạng ức chế và trầm cảm.</p>
-        <h2 id="hcqutoxickhng">Họ có quá toxic không?</h2>
-        <p>Sau khi pull request bị reject thì đôi khi lại tạo ra cảm giác tức tối, thậm chí người reject pull request của bạn có khi code cũng chẳng hay lắm. Nhưng cách nói chuyện thì toxic vãi. Thật ra không phải mọi người nhận pull request đều toxic, chỉ là một phần khá đông mà bạn xui xẻo gặp phải. Hoặc do bạn chưa đọc kỹ CONTRIBUTOR guide. Thường các project lớn sẽ có riêng một phần để hướng dẫn bạn tạo một pull request đảm bảo đúng tiêu chuẩn của họ.</p>
-        <h2 id="btunhthno">Bắt đầu như thế nào</h2>
-        <h3 id="1gitmodelcahlgcquynhinhousenovnamingkhng">1. Git model của họ là gì? có quy định in-house nào về naming không?</h3>
-        <h4 id="amergehayrebase">a. Merge hay rebase?</h4>
-        <p>Đây là điều bạn nên thuận trọng, team của họ có thể sẽ prefer <code>rebase</code> thay vì <code>merge</code>. Nên việc tạo pull request kèm theo một đống merge chằng chéo giữa các branches chẳng khác nào tát vào mặt họ. Một team lead nói với mình, <em>“Bọn tao prefer rebase bởi gì nó cho một history liên tục và đẹp hơn.”</em>. Mỗi team có lý do riêng nên nếu bạn tôn trọng họ thì bạn sẽ được tôn trọng.</p>
-        <p>Có một số nhóm khác thì prefer merge, các nhóm perfer merge chủ yếu chỉ quan tâm tới việc làm sao để các features được phát triển song song chứ cũng không cần hình thức lắm. Nhưng tất nhiên cũng có một số luật như, đừng bao giờ merge master vào develop… Những luật này hình thành trong quá trình development hoặc do team đó tự quy định bạn cần phải đọc.</p>
-        <h4 id="bhctobranchchomifeaturekhng">b. Họ có tạo branch cho mỗi feature không?</h4>
-        <p>Cái này tùy thuộc team, nhưng điều bạn cần làm là dùng chức năng visualization để xem git graph. Nó sẽ cho bạn thấy sự phát triển của các branch như thế nào, đâu là branch chính. Có prefix cho branch hay không?.</p>
-        <p>Chẳng hạn có nhiều team có quy định cho branch như sau:</p>
-        <p>Feature sẽ bắt đầu với <code>feature/</code> và tiếp theo sau là tên feature với underscore thay cho space.</p>
-        <p>Ví dụ: <code>feature/new_login_form</code></p>
-        <p>Và cứ như vậy chúng ta có <code>bug/</code>, <code>hotfix/</code>, <code>misc/</code>… tùy theo mục đích và sự cần thiết</p>
-        <h4 id="chcquynhtcommitmessagekhng">c. Họ có quy định đặt commit message không?</h4>
-        <p>Có rất nhiều team có quy định về commit message rất chặt chẽ, như phải có prefix <code>[feature]</code>, <code>[fix]</code>, <code>[document]</code>… Tuy nhiên có một số team lại có nhiều yêu cầu kỳ cục như: tất cả đều phải là chữ thường, và chia ở thì hiện tại đơn.</p>
-        <p>Chẳng hạn thay vì: <code>imrpoving validator's methods</code> phải là <code>improve validator's methods</code></p>
-        <p>Ngoài ra còn có những quy tắc khác như kèm theo task id hoặc issue number.</p>
-        <p>Ví dụ: <code>#23 improve validator's methods</code></p>
-        <p>Hoặc một số team màu mè hơn như sau:</p>
-        <p><code>[Improve] validator's methods #23</code></p>
-        <p>Bạn cần xerm git log để xem team đang dùng format nào và dùng cho phù hợp</p>
-        <p>Và nếu cảm thấy muốn nắm rõ hơn hãy đọc quyển này <a href="https://git-scm.com/book/en/v2">Pro Git</a>.</p>
-        <h4 id="dhcthitlpautomationchoprojectkhng">d. Họ có thiết lập automation cho project không?</h4>
-        <p>Một số repo có thiết lập automation trong phần project nên khi bạn tạo một pull request giải quyết issue #23 chẳng hạn. Người ta sẽ cần bạn thêm nội dung sau trong pull request:</p>
-        <p>Ví dụ:</p>
-        <pre><code>Title:
-Improve validator's method
-
-Description:
-This pull request is enhancing validation, resolve: #23
-</code></pre>
-        <p>Ngoài resolve thì nó có thể là <code>close #23</code>, <code>fix #23</code>… bạn dọc thêm <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">ở đây</a>.</p>
-        <p>Để đọc về các thiết lập automation cho project <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/configuring-automation-for-project-boards">ở đây</a>.</p>
-        <h4 id="ehcgithookkhng">e. Họ có git hook không?</h4>
-        <p>Nhiều project mình biết thì thường thêm git hook vào để kiểm tra code coverage, thực thi test, kiểm tra commit message… Việc bạn nên làm khi có githook là hãy để im nó làm việc của nó. Việc bạn sữ dụng <code>git commit --no-verify</code> là một việc làm khó có thể chấp nhận được.</p>
-        <h3 id="2chvcicd">2. Chú ý về CI/CD</h3>
-        <p>CI/CD giúp ích rất nhiều trong development cũng như đảm bảo deliver features đúng hẹn. Phần lớn các team đều có các phần để integrate với travis-ci, circle-ci… nên bạn cần xem liệu mình có cần thêm các thiết lập này để code của bạn hoạt động trên các môi trường của travis or cricle không.</p>
-        <h4 id="acodecabncpasstestcaseskhng">a. Code của bạn có pass test cases không?</h4>
-        <p>Thường thì các project đều có test suite và rất nhiều test cases để đảm bảo code quality. Do đó khi bạn thực hiện bug fix thì điều quan trọng là bạn phải pass mọi test cases. Còn trường hợp bạn thêm feature mới thì bạn phải thêm test cases cho features đó. Nó gần như là luật bất thành văn rồi.</p>
-        <h4 id="bcodecabncgimcodecoveragekhng">b. Code của bạn có giảm code coverage không?</h4>
-        <p>Code coverage có thể nói là một tiêu chí để đánh giá xem bao nhiêu bug đã được mặc áo đẹp. Các project với chỉ số coverage càng cao thì có thể nói là độ tin cậy của code càng cao. Vì phần lớn code đã pass qua các test cases. Nên khi pull request của bạn làm giảm code coverage thì không ai muốn merge nó cả.</p>
-        <h2 id="3hiuprojectvtradeoff">3. Hiểu project và trade-off</h2>
-        <p>Có một số project họ đã chấp nhận code đó là trade-off thì bạn cũng không nên cố chấp sửa nó làm gì. Vì họ cũng đã cân nhắc kha khá, nên thường các pull request đụng vào dạng code này thì ít khi được merge trừ khi nó xuất sắc.</p>
-        <h1 id="tmkt">Tạm kết</h1>
-        <p>Bài viết không dài không ngắn, mình mong các bạn tìm ra được một điều gì đó hữu ích cho bản thân và cùng cho đi nhiều hơn. Nếu bài viết này có chỗ chưa thỏa đáng hoặc sai lỗi chính tả thì các bạn nhẹ tay dùm.</p><br />
-        <h1 id="implementsingletonngtrongtypescript">Implement Singleton đúng trong TypeScript</h1>
-        <p>Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nữa, vậy mà cũng có 8K claps. Mình tự hỏi mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là <code>static</code> hay <code>dynamic</code> trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.</p>
-        <h2 id="singleton">Singleton</h2>
-        <p>Singleton thì không phải nói nhiều, nó được dùng để đảm bảo performance giảm resource để cấp và khởi tạo các dynamic object. Singleton được dùng khi một object được dùng đi dùng lại nhiều lần, cho cùng một mục đích. Singleton có thể xem là vừa có ưu thế của <code>static</code> và <code>dynamic</code> object. Singleton được viết nhiều dùng nhiều mình chỉ dùng chung ý tưởng đó nhưng implement riêng cho TypeScript.</p>
-        <pre><code>// Need to cache all dynamic instance
-const instanceCache: { [key: string]: any } = {};
-
-export function Singleton&lt;T&gt;(
-  instanceName: string,
-  Constuctor: new (...params: any[]) =&gt; T,
-  ...constructorParams: any[]
-): T {
-  if (typeof instanceCache[instanceName] !== 'undefined') {
-    // Construct new instance with given params
-    instanceCache[instanceName] = new Constuctor(...constructorParams);
-  }
-  return instanceCache[instanceName];
-}
-
-export default Singleton;
-</code></pre>
-        <p>Code trên chỉ là cache lại dynamic instance vào một static instance, thay vì chỉ dùng được cho một loại constructor thì nó sẽ support cho nhiều loại constructor. Tiếp theo mình viết một example class để test Singleton.</p>
-        <pre><code>import { Singleton } from './singleton';
-
-export default class TestClass {
-  private name: string;
-
-  private time: Date;
-
-  constructor(name: string) {
-    this.name = name;
-    this.time = new Date();
-  }
-
-  public print() {
-    process.stdout.write(`${this.name} - ${this.time.toLocaleString()}\n`);
-  }
-
-  public static getInstance(): TestClass {
-    return Singleton&lt;TestClass&gt;('test-class-singleton', TestClass, 'Thanos');
-  }
-}
-</code></pre>
-        <p><code>public static getInstance(): TestClass</code> là điểm đáng quan tâm ở đây, còn lại thì <code>TestClass</code> được định nghĩa hoàn toàn bình thường. Đây là cách mình viết main code:</p>
-        <pre><code>import TestClass from './testclass';
-
-const classInstance = TestClass.getInstance();
-
-// Print class's data
-classInstance.print();
-
-// Just to make sure it's singleton
-setTimeout(() =&gt; {
-  TestClass.getInstance().print();
-}, 10000);
-</code></pre>
-        <p>Kết quả:</p>
-        <pre><code>Thanos - 11/28/2020, 10:00:07 AM
-Thanos - 11/28/2020, 10:00:07 AM
-</code></pre>
-        <p>Mình có cẩn thận thêm cái <code>setTimeout()</code> để chắc là <code>constructor()</code> chỉ được gọi một lần duy nhất. Bạn có thể đọc code, tự suy nghĩ, tự improve nó cho nó hay hơn. Hoặc viết một bài phân tích cái ngu của bài này.</p>
-        <p><em>Đừng tin bất cứ thứ gì trên Internet, bài viết này cũng vậy. Bạn có não mà!.</em></p><br />
         <h1 id="capturetcptraffic">Capture TCP Traffic</h1>
         <p>Before you read this article, <a href="https://fkguru.com/programming-with-libpcap.html">Programing with pcap</a>.</p>
         <h2 id="dumpbinarydata">Dump binary data</h2>
@@ -692,6 +294,404 @@ void packet_handler(
 00000220:   1A 60 5A 94  B3 83 22 EB  F3 60 98 24  54 8F FB 94    .`Z..."..`.$T...
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
+</code></pre><br />
+        <h1 id="lmthnocontributengtrngithub">Làm thế nào để contribute đúng trên GitHub</h1>
+        <p><strong>Phần lớn lập trình viên sẽ dành thời gian học tập trên hai trang nổi tiếng PornHub và GitHub. Tuy không có nhiều tư liệu bắt mắt nhưng GitHub host một lượng lớn các project open-source. Contribution sẽ là một nhu cầu tất yếu, nhưng contribute như thế nào để mọi người đều vui vẻ là câu chuyện dài với newbee.</strong></p>
+        <h1 id="giithiu">Giới thiệu</h1>
+        <p>Việc dành thời gian để contribute cho các project open-source không hẳn là vô bổ nó giúp chúng ta hoàn thiện kỹ năng cũng như học thêm về working flow của các nhóm open-source khác nhau, từ đó improve bản thân để đạt được những milestone lớn hơn. Thậm chí với chút ít may mắn các bạn có thể được các công ty để mắt và đưa ra những offer hấp dẫn.</p>
+        <h2 id="tilaiylu">Tôi là ai đây là đâu?</h2>
+        <p>Đây là tâm lý chung của một thanh niên mới tạo account GitHub, cảm giác khá là khó hiểu khi đang hình dung xem “Wtf is happening over there?”. Sau thời gian làm quen và sử dụng GitHub thấy và project hay hay, mỗi chúng ta sẽ có ý định contribute code của mình cho các project đó.</p>
+        <p>Nhưng mọi chuyện đâu như là mơ, rào cản thứ nhất là không hiểu rõ cấu trúc project, rào cản thứ hai là ngôn ngữ, rào cản thứ ba là không quen ai, rào cản thứ tư là code sai standard hoặc sai yêu cần từ bên nhận pull request. Vậy là thay vì được chào đón, newbee bị tổng sỉ vã, chửi bới các kiểu. Điều này đôi lúc làm tổn thương và gây ra nhiều dạng ức chế và trầm cảm.</p>
+        <h2 id="hcqutoxickhng">Họ có quá toxic không?</h2>
+        <p>Sau khi pull request bị reject thì đôi khi lại tạo ra cảm giác tức tối, thậm chí người reject pull request của bạn có khi code cũng chẳng hay lắm. Nhưng cách nói chuyện thì toxic vãi. Thật ra không phải mọi người nhận pull request đều toxic, chỉ là một phần khá đông mà bạn xui xẻo gặp phải. Hoặc do bạn chưa đọc kỹ CONTRIBUTOR guide. Thường các project lớn sẽ có riêng một phần để hướng dẫn bạn tạo một pull request đảm bảo đúng tiêu chuẩn của họ.</p>
+        <h2 id="btunhthno">Bắt đầu như thế nào</h2>
+        <h3 id="1gitmodelcahlgcquynhinhousenovnamingkhng">1. Git model của họ là gì? có quy định in-house nào về naming không?</h3>
+        <h4 id="amergehayrebase">a. Merge hay rebase?</h4>
+        <p>Đây là điều bạn nên thuận trọng, team của họ có thể sẽ prefer <code>rebase</code> thay vì <code>merge</code>. Nên việc tạo pull request kèm theo một đống merge chằng chéo giữa các branches chẳng khác nào tát vào mặt họ. Một team lead nói với mình, <em>“Bọn tao prefer rebase bởi gì nó cho một history liên tục và đẹp hơn.”</em>. Mỗi team có lý do riêng nên nếu bạn tôn trọng họ thì bạn sẽ được tôn trọng.</p>
+        <p>Có một số nhóm khác thì prefer merge, các nhóm perfer merge chủ yếu chỉ quan tâm tới việc làm sao để các features được phát triển song song chứ cũng không cần hình thức lắm. Nhưng tất nhiên cũng có một số luật như, đừng bao giờ merge master vào develop… Những luật này hình thành trong quá trình development hoặc do team đó tự quy định bạn cần phải đọc.</p>
+        <h4 id="bhctobranchchomifeaturekhng">b. Họ có tạo branch cho mỗi feature không?</h4>
+        <p>Cái này tùy thuộc team, nhưng điều bạn cần làm là dùng chức năng visualization để xem git graph. Nó sẽ cho bạn thấy sự phát triển của các branch như thế nào, đâu là branch chính. Có prefix cho branch hay không?.</p>
+        <p>Chẳng hạn có nhiều team có quy định cho branch như sau:</p>
+        <p>Feature sẽ bắt đầu với <code>feature/</code> và tiếp theo sau là tên feature với underscore thay cho space.</p>
+        <p>Ví dụ: <code>feature/new_login_form</code></p>
+        <p>Và cứ như vậy chúng ta có <code>bug/</code>, <code>hotfix/</code>, <code>misc/</code>… tùy theo mục đích và sự cần thiết</p>
+        <h4 id="chcquynhtcommitmessagekhng">c. Họ có quy định đặt commit message không?</h4>
+        <p>Có rất nhiều team có quy định về commit message rất chặt chẽ, như phải có prefix <code>[feature]</code>, <code>[fix]</code>, <code>[document]</code>… Tuy nhiên có một số team lại có nhiều yêu cầu kỳ cục như: tất cả đều phải là chữ thường, và chia ở thì hiện tại đơn.</p>
+        <p>Chẳng hạn thay vì: <code>imrpoving validator's methods</code> phải là <code>improve validator's methods</code></p>
+        <p>Ngoài ra còn có những quy tắc khác như kèm theo task id hoặc issue number.</p>
+        <p>Ví dụ: <code>#23 improve validator's methods</code></p>
+        <p>Hoặc một số team màu mè hơn như sau:</p>
+        <p><code>[Improve] validator's methods #23</code></p>
+        <p>Bạn cần xerm git log để xem team đang dùng format nào và dùng cho phù hợp</p>
+        <p>Và nếu cảm thấy muốn nắm rõ hơn hãy đọc quyển này <a href="https://git-scm.com/book/en/v2">Pro Git</a>.</p>
+        <h4 id="dhcthitlpautomationchoprojectkhng">d. Họ có thiết lập automation cho project không?</h4>
+        <p>Một số repo có thiết lập automation trong phần project nên khi bạn tạo một pull request giải quyết issue #23 chẳng hạn. Người ta sẽ cần bạn thêm nội dung sau trong pull request:</p>
+        <p>Ví dụ:</p>
+        <pre><code>Title:
+Improve validator's method
+
+Description:
+This pull request is enhancing validation, resolve: #23
+</code></pre>
+        <p>Ngoài resolve thì nó có thể là <code>close #23</code>, <code>fix #23</code>… bạn dọc thêm <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">ở đây</a>.</p>
+        <p>Để đọc về các thiết lập automation cho project <a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/configuring-automation-for-project-boards">ở đây</a>.</p>
+        <h4 id="ehcgithookkhng">e. Họ có git hook không?</h4>
+        <p>Nhiều project mình biết thì thường thêm git hook vào để kiểm tra code coverage, thực thi test, kiểm tra commit message… Việc bạn nên làm khi có githook là hãy để im nó làm việc của nó. Việc bạn sữ dụng <code>git commit --no-verify</code> là một việc làm khó có thể chấp nhận được.</p>
+        <h3 id="2chvcicd">2. Chú ý về CI/CD</h3>
+        <p>CI/CD giúp ích rất nhiều trong development cũng như đảm bảo deliver features đúng hẹn. Phần lớn các team đều có các phần để integrate với travis-ci, circle-ci… nên bạn cần xem liệu mình có cần thêm các thiết lập này để code của bạn hoạt động trên các môi trường của travis or cricle không.</p>
+        <h4 id="acodecabncpasstestcaseskhng">a. Code của bạn có pass test cases không?</h4>
+        <p>Thường thì các project đều có test suite và rất nhiều test cases để đảm bảo code quality. Do đó khi bạn thực hiện bug fix thì điều quan trọng là bạn phải pass mọi test cases. Còn trường hợp bạn thêm feature mới thì bạn phải thêm test cases cho features đó. Nó gần như là luật bất thành văn rồi.</p>
+        <h4 id="bcodecabncgimcodecoveragekhng">b. Code của bạn có giảm code coverage không?</h4>
+        <p>Code coverage có thể nói là một tiêu chí để đánh giá xem bao nhiêu bug đã được mặc áo đẹp. Các project với chỉ số coverage càng cao thì có thể nói là độ tin cậy của code càng cao. Vì phần lớn code đã pass qua các test cases. Nên khi pull request của bạn làm giảm code coverage thì không ai muốn merge nó cả.</p>
+        <h2 id="3hiuprojectvtradeoff">3. Hiểu project và trade-off</h2>
+        <p>Có một số project họ đã chấp nhận code đó là trade-off thì bạn cũng không nên cố chấp sửa nó làm gì. Vì họ cũng đã cân nhắc kha khá, nên thường các pull request đụng vào dạng code này thì ít khi được merge trừ khi nó xuất sắc.</p>
+        <h1 id="tmkt">Tạm kết</h1>
+        <p>Bài viết không dài không ngắn, mình mong các bạn tìm ra được một điều gì đó hữu ích cho bản thân và cùng cho đi nhiều hơn. Nếu bài viết này có chỗ chưa thỏa đáng hoặc sai lỗi chính tả thì các bạn nhẹ tay dùm.</p><br />
+        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
+        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
+        <h2 id="hashfunction">Hash function</h2>
+        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
+        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
+        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
+        <h2 id="implementation">Implementation</h2>
+        <ul>
+          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
+          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
+        </ul><br />
+        <h1 id="xorshiftbasedpseudorandom">XorShift based pseudo random</h1>
+        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspired me to create another kind of <code>Xorshift</code> based without static initial.</p>
+        <p>The basic concept is:</p>
+        <ul>
+          <li>Seeding with a initial value <code>seed</code></li>
+          <li>Repeat caculation for every bit of <code>seed</code></li>
+          <li><code>i</code> is denoted for bit <code>i th</code></li>
+          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
+          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
+          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
+        </ul>
+        <h2 id="implementation">Implementation</h2>
+        <h3 id="implementinpython">Implement in Python</h3>
+        <pre><code class="python language-python">import random
+
+seed = random.randint(0x55555555, 0xffffffff)
+
+
+def rnd():
+    global seed
+    x = 0
+    for i in range(32):
+        if (seed &gt;&gt; i) &amp; 1:
+            x ^= seed &gt;&gt; i
+        else:
+            x ^= seed &lt;&lt; i
+    x = 0xffffffff &amp; x
+    seed = x
+    return x
+
+
+for i in range(1000):
+    print rnd()
+</code></pre>
+        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
+        <pre><code class="js language-js">const crypto = require('crypto');
+
+//Generate seed randomBytes
+var seed = crypto.randomBytes(4).readUInt32LE(0);
+
+//XorShift based PRNG
+function rnd(){
+    var x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        //Shift right if [i th] bit is equal to 1, otherwise shift letf
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x &gt;&gt;&gt; 0;
+}
+
+for(let i = 0; i &lt; 1000; i++){
+  process.stdout.write(`${i}\n`)
+}
+</code></pre>
+        <h3 id="implementinc">Implement in C</h3>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+unsigned int seed;
+
+unsigned int rnd(){
+    unsigned int x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x;
+}
+
+int main(){
+    time_t tsec;
+    int i = 0;
+    tsec = time(NULL);
+    seed = (unsigned int)tsec;
+    for(;i &lt; 1000; i++) printf("%u\n", rnd());
+    return 0;
+}
+</code></pre>
+        <p>Test:</p>
+        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
+</code></pre>
+        <h2 id="conclusion">Conclusion</h2>
+        <ul>
+          <li><code>0x00000000</code> and other kind of <em>poor entropy seed</em> are the worst thing to this <strong>algorithm</strong></li>
+          <li>The result is predictable within disclosed <code>seed</code></li>
+          <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
+          <li>It isn't safe for cryptography purpose</li>
+        </ul><br />
+        <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
+        <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
+        <h2 id="installdevelopmentenvironment">Install development environment</h2>
+        <p>I'm using <code>Fedora 29</code> and have no idea about your <strong>Operating System</strong> then some might not work.</p>
+        <pre><code>$ sudo dnf install gcc make cmake libpcap-devel
+</code></pre>
+        <p><code>libpcap-devel</code> is required, of course.</p>
+        <h2 id="writefirstprogramtolistingalldevice">Write first program to listing all device</h2>
+        <p>It's some kind of <code>Hello World!</code> with <code>libpcap</code>.</p>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;pcap.h&gt;
+
+int main()
+{
+  pcap_if_t *alldevs;
+  pcap_if_t *d;
+  int i = 0;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* Retrieve the device list from the local machine */
+  if (pcap_findalldevs(&amp;alldevs, errbuf) == -1)
+  {
+    fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    return 0;
+  }
+
+  /* Print the list */
+  for (d = alldevs; d != NULL; d = d-&gt;next)
+  {
+    printf("%d. %s", ++i, d-&gt;name);
+    if (d-&gt;description)
+      printf(" (%s)\n", d-&gt;description);
+    else
+      printf(" (No description available)\n");
+  }
+
+  if (i == 0)
+  {
+    printf("\nNo interfaces found! Make sure libPcap is installed.\n");
+    return 1;
+  }
+
+  /* Free device list */
+  pcap_freealldevs(alldevs);
+}
+</code></pre>
+        <h2 id="compileandrun">Compile and run</h2>
+        <p>It's the same to complie <code>Hello World!</code> but you need to add <code>-lpcap</code> to link <code>libpcap</code> to your program.</p>
+        <pre><code>gcc ./src/list_devices.c -o ./list_devices -lpcap &amp;&amp; ./list_devices
+</code></pre>
+        <p>Result:</p>
+        <pre><code>1. enp3s0 (No description available)
+2. lo (No description available)
+3. any (Pseudo-device that captures on all interfaces)
+4. virbr0 (No description available)
+5. bluetooth-monitor (Bluetooth Linux Monitor)
+6. nflog (Linux netfilter log (NFLOG) interface)
+7. nfqueue (Linux netfilter queue (NFQUEUE) interface)
+8. bluetooth0 (Bluetooth adapter number 0)
+9. usbmon0 (All USB buses)
+10. wlo1 (No description available)
+11. usbmon1 (USB bus number 1)
+12. usbmon2 (USB bus number 2)
+13. virbr0-nic (No description available)
+</code></pre>
+        <p><a href="https://fkguru.com/capture-tcp-traffic.html">Capture all TCP traffic </a>.</p>
+        <h2 id="credits">Credits</h2>
+        <p>Thanks to these guys,</p>
+        <ul>
+          <li><a href="https://www.tcpdump.org/pcap.html">Programming with pcap, Tim Carstens</a></li>
+          <li><a href="https://www.devdungeon.com/content/using-libpcap-c">Using libpcap in C</a></li>
+          <li><a href="http://yuba.stanford.edu/~casado/pcap/section3.html">Programming with pcap</a></li>
+        </ul><br />
+        <h1 id="implementsingletonngtrongtypescript">Implement Singleton đúng trong TypeScript</h1>
+        <p>Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nữa, vậy mà cũng có 8K claps. Mình tự hỏi mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là <code>static</code> hay <code>dynamic</code> trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.</p>
+        <h2 id="singleton">Singleton</h2>
+        <p>Singleton thì không phải nói nhiều, nó được dùng để đảm bảo performance giảm resource để cấp và khởi tạo các dynamic object. Singleton được dùng khi một object được dùng đi dùng lại nhiều lần, cho cùng một mục đích. Singleton có thể xem là vừa có ưu thế của <code>static</code> và <code>dynamic</code> object. Singleton được viết nhiều dùng nhiều mình chỉ dùng chung ý tưởng đó nhưng implement riêng cho TypeScript.</p>
+        <pre><code>// Need to cache all dynamic instance
+const instanceCache: { [key: string]: any } = {};
+
+export function Singleton&lt;T&gt;(
+  instanceName: string,
+  Constuctor: new (...params: any[]) =&gt; T,
+  ...constructorParams: any[]
+): T {
+  if (typeof instanceCache[instanceName] !== 'undefined') {
+    // Construct new instance with given params
+    instanceCache[instanceName] = new Constuctor(...constructorParams);
+  }
+  return instanceCache[instanceName];
+}
+
+export default Singleton;
+</code></pre>
+        <p>Code trên chỉ là cache lại dynamic instance vào một static instance, thay vì chỉ dùng được cho một loại constructor thì nó sẽ support cho nhiều loại constructor. Tiếp theo mình viết một example class để test Singleton.</p>
+        <pre><code>import { Singleton } from './singleton';
+
+export default class TestClass {
+  private name: string;
+
+  private time: Date;
+
+  constructor(name: string) {
+    this.name = name;
+    this.time = new Date();
+  }
+
+  public print() {
+    process.stdout.write(`${this.name} - ${this.time.toLocaleString()}\n`);
+  }
+
+  public static getInstance(): TestClass {
+    return Singleton&lt;TestClass&gt;('test-class-singleton', TestClass, 'Thanos');
+  }
+}
+</code></pre>
+        <p><code>public static getInstance(): TestClass</code> là điểm đáng quan tâm ở đây, còn lại thì <code>TestClass</code> được định nghĩa hoàn toàn bình thường. Đây là cách mình viết main code:</p>
+        <pre><code>import TestClass from './testclass';
+
+const classInstance = TestClass.getInstance();
+
+// Print class's data
+classInstance.print();
+
+// Just to make sure it's singleton
+setTimeout(() =&gt; {
+  TestClass.getInstance().print();
+}, 10000);
+</code></pre>
+        <p>Kết quả:</p>
+        <pre><code>Thanos - 11/28/2020, 10:00:07 AM
+Thanos - 11/28/2020, 10:00:07 AM
+</code></pre>
+        <p>Mình có cẩn thận thêm cái <code>setTimeout()</code> để chắc là <code>constructor()</code> chỉ được gọi một lần duy nhất. Bạn có thể đọc code, tự suy nghĩ, tự improve nó cho nó hay hơn. Hoặc viết một bài phân tích cái ngu của bài này.</p>
+        <p><em>Đừng tin bất cứ thứ gì trên Internet, bài viết này cũng vậy. Bạn có não mà!.</em></p><br />
+        <h1 id="rungoethereuminsideadockercontainerasnonrootuser">Run go Ethereum inside a docker container as non-root user</h1>
+        <p>I do serveral experiments on Ethereum blockchain it's really fun to play around. Sometime, you want to have a few decentralized features then you supposed to run your own node instead of <a href="https://infura.io/">Infura</a> endpoint. This article is also a experiment to have fun with Ethereum and docker container.</p>
+        <h2 id="dockercompose">Docker compose</h2>
+        <p><code>docker-compose.yml</code> is quite familiar to start a docker project.</p>
+        <pre><code>version: "3.7"
+services:
+  geth:
+    image: my-geth:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "smart-ass"
+    volumes:
+      - ./data/:/home/smart-ass/data/:rw
+</code></pre>
+        <p>In this configuration, I'm going to map my current directory <code>./data/</code> into <code>/home/smart-ass/data</code>, just want to make sure I won't lost my synchronization even I start a new container.</p>
+        <h2 id="writingascripttostartdockercompose">Writing a script to start docker-compose</h2>
+        <p>This script will create a user named <code>smart-ass</code> belong to <code>smart-ass</code> group and passed arguments from host to the container.</p>
+        <pre><code class="sh language-sh">#!/usr/bin/env sh
+
+PARENT_USER=smart-ass
+PARENT_UID=1988
+PARENT_GROUP=smart-ass
+PARENT_GID=1988
+
+# Creating smart ass user and group
+getent group smart-ass 
+if [ $? -eq 2 ]; then
+    sudo groupadd -g 1988 smart-ass
+    sudo useradd -M -g smart-ass -u 1988 smart-ass
+fi
+
+# Create folder if not existed
+if [ ! -d "./data/" ]; then
+  sudo mkdir ./data/
+fi
+
+# Changing owner ship of data folder
+sudo chown ${PARENT_USER}:${PARENT_GROUP} -R ./data/
+sudo chmod 755 -R ./data/
+
+# Start docker build with argument
+sudo docker-compose build \
+    --build-arg PARENT_USER=${PARENT_USER} \
+    --build-arg PARENT_UID=${PARENT_UID} \
+    --build-arg PARENT_GROUP=${PARENT_GROUP} \
+    --build-arg PARENT_GID=${PARENT_GID}
+</code></pre>
+        <p>User's id and group's id were specified as a unique number <code>1988</code>. Let's take a look inside <code>Dockerfile</code></p>
+        <h2 id="dockerfile">Dockerfile</h2>
+        <p><a href="https://alpinelinux.org/">Alpine Linux</a> is good choice to begin with, <code>geth</code> is also supported by default that's make my job easier.</p>
+        <pre><code>FROM alpine:latest
+
+# Consumed agurments from host machine
+ARG PARENT_USER
+ARG PARENT_UID
+ARG PARENT_GROUP
+ARG PARENT_GID
+
+# Define home folder
+ENV HOME=/home/${PARENT_USER}
+
+# Install geth
+# Add `smart-ass` group
+# Add `smart-ass` user
+# UID and GID is the same to host machine, we just want to make sure host's data is accessible to container's user
+RUN apk add geth \
+    &amp;&amp; addgroup -g ${PARENT_GID} ${PARENT_GROUP} \
+    &amp;&amp; adduser -D -u ${PARENT_UID} -G ${PARENT_GROUP} -h ${HOME} ${PARENT_USER}
+
+WORKDIR ${HOME}
+
+COPY ./docker-script.sh ./docker-script.sh
+
+RUN chown ${PARENT_USER}:${PARENT_USER} ./docker-script.sh \
+    &amp;&amp; chmod a+x ./docker-script.sh
+
+USER ${PARENT_USER}
+
+# Is required to discover ethereum nodes
+EXPOSE 30303/tcp 30303/udp
+
+CMD ["./docker-script.sh"]
+</code></pre>
+        <p>The golden rule is, <em>"don't run with root privilege"</em>.</p>
+        <h2 id="startupcommand">Startup command</h2>
+        <p>I want to run serveral commands during container boot up so I created <code>./docker-script.sh</code>:</p>
+        <pre><code class="sh language-sh">#!/usr/bin/env sh
+
+container_info=`id`
+echo "Container info: ${container_info}"
+echo "Test write to data folder:"
+ls -la ${HOME}/data/
+date &gt; ${HOME}/data/test-write.txt
+cat ${HOME}/data/test-write.txt
+geth --datadir ${HOME}/data --rinkeby --syncmode "light"
+</code></pre>
+        <h3 id="rundockerwithoutdockercompose">Rundocker without <code>docker-compose</code></h3>
+        <pre><code>docker run -v $(pwd)/data/:/home/smart-ass/data -ti --rm my-geth:latest
+</code></pre>
+        <h2 id="conclusion">Conclusion</h2>
+        <ul>
+          <li>The golden rule is, <em>"don't run with root privilege"</em>.</li>
+          <li>Docker container was started with non-root user</li>
+          <li><code>./data/geth.ipc</code> was accessible from inside and outside of docker container.</li>
+          <li><a href="https://web3js.readthedocs.io/en/1.0/web3.html#providers">IPCProvider</a> is providing impresive performance</li>
+          <li>You could run with current user by changing these lines:</li>
+        </ul>
+        <pre><code class="sh language-sh">PARENT_USER=$(id -u)
+PARENT_UID=$(id -nu ${PARENT_USER})
+PARENT_GROUP=$(id -ng ${PARENT_USER})
+PARENT_GID=$(id -g ${PARENT_USER})
 </code></pre>
       </div>
     </div>

@@ -1,6 +1,6 @@
 # Implement Singleton đúng trong TypeScript
 
-Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nửa, vậy mà cũng có 8K claps. Mình tự hỏi mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là `static` hay `dynamic` trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.
+Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nửa, vậy mà cũng có 8K claps. Mình tự hỏi, mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là `static` hay `dynamic` trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.
 
 ## Singleton
 

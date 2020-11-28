@@ -64,7 +64,7 @@
       </div>
       <div class="page-content">
         <h1 id="implementsingletonngtrongtypescript">Implement Singleton đúng trong TypeScript</h1>
-        <p>Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nửa, vậy mà cũng có 8K claps. Mình tự hỏi mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là <code>static</code> hay <code>dynamic</code> trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.</p>
+        <p>Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nửa, vậy mà cũng có 8K claps. Mình tự hỏi, mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là <code>static</code> hay <code>dynamic</code> trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.</p>
         <h2 id="singleton">Singleton</h2>
         <p>Singleton thì không phải nói nhiều, nó được dùng để đảm bảo performance giảm resource để cấp và khởi tạo các dynamic object. Singleton được dùng khi một object được dùng đi dùng lại nhiều lần, cho cùng một mục đích. Singleton có thể xem là vừa có ưu thế của <code>static</code> và <code>dynamic</code> object. Singleton được viết nhiều dùng nhiều mình chỉ dùng chung ý tưởng đó nhưng implement riêng cho TypeScript.</p>
         <pre><code class="ts language-ts">// Need to cache all dynamic instance

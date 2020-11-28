@@ -71,7 +71,7 @@ export function Singleton&lt;T&gt;(
 
 export default Singleton;
 </code></pre>
-        <p>Code trên chỉ là cache lại dynamic instance vào một static instance, thay vì chỉ dùng được cho một loại constructor thì nó sẽ support cho nhiều loại constructor. Tiếp theo mình viết một example class để test Singleton.</p>
+        <p>Code trên chỉ là cache lại dynamic instance vào một static object, thay vì chỉ dùng được cho một loại constructor thì nó sẽ support cho nhiều loại constructor. Tiếp theo mình viết một example class để test Singleton.</p>
         <pre><code class="ts language-ts">import { Singleton } from './singleton';
 
 export default class TestClass {

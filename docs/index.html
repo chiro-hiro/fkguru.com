@@ -176,104 +176,6 @@ PARENT_UID=$(id -nu ${PARENT_USER})
 PARENT_GROUP=$(id -ng ${PARENT_USER})
 PARENT_GID=$(id -g ${PARENT_USER})
 </code></pre><br />
-        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
-        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
-        <h2 id="hashfunction">Hash function</h2>
-        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
-        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
-        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
-        <h2 id="implementation">Implementation</h2>
-        <ul>
-          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
-          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
-        </ul><br />
-        <h1 id="xorshiftbasedpseudorandom">XorShift based pseudo random</h1>
-        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspired me to create another kind of <code>Xorshift</code> based without static initial.</p>
-        <p>The basic concept is:</p>
-        <ul>
-          <li>Seeding with a initial value <code>seed</code></li>
-          <li>Repeat caculation for every bit of <code>seed</code></li>
-          <li><code>i</code> is denoted for bit <code>i th</code></li>
-          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
-          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
-          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
-        </ul>
-        <h2 id="implementation">Implementation</h2>
-        <h3 id="implementinpython">Implement in Python</h3>
-        <pre><code class="python language-python">import random
-
-seed = random.randint(0x55555555, 0xffffffff)
-
-
-def rnd():
-    global seed
-    x = 0
-    for i in range(32):
-        if (seed &gt;&gt; i) &amp; 1:
-            x ^= seed &gt;&gt; i
-        else:
-            x ^= seed &lt;&lt; i
-    x = 0xffffffff &amp; x
-    seed = x
-    return x
-
-
-for i in range(1000):
-    print rnd()
-</code></pre>
-        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
-        <pre><code class="js language-js">const crypto = require('crypto');
-
-//Generate seed randomBytes
-var seed = crypto.randomBytes(4).readUInt32LE(0);
-
-//XorShift based PRNG
-function rnd(){
-    var x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        //Shift right if [i th] bit is equal to 1, otherwise shift letf
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x &gt;&gt;&gt; 0;
-}
-
-for(let i = 0; i &lt; 1000; i++){
-  process.stdout.write(`${i}\n`)
-}
-</code></pre>
-        <h3 id="implementinc">Implement in C</h3>
-        <pre><code class="c language-c">#include &lt;stdio.h&gt;
-#include &lt;time.h&gt;
-
-unsigned int seed;
-
-unsigned int rnd(){
-    unsigned int x = 0, i;
-    for(i = 0; i &lt; 32; i++){
-        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
-    }
-    return seed = x;
-}
-
-int main(){
-    time_t tsec;
-    int i = 0;
-    tsec = time(NULL);
-    seed = (unsigned int)tsec;
-    for(;i &lt; 1000; i++) printf("%u\n", rnd());
-    return 0;
-}
-</code></pre>
-        <p>Test:</p>
-        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
-</code></pre>
-        <h2 id="conclusion">Conclusion</h2>
-        <ul>
-          <li><code>0x00000000</code> and other kind of <em>poor entropy seed</em> are the worst thing to this <strong>algorithm</strong></li>
-          <li>The result is predictable within disclosed <code>seed</code></li>
-          <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
-          <li>It isn't safe for cryptography purpose</li>
-        </ul><br />
         <h1 id="lmthnocontributengtrngithub">Làm thế nào để contribute đúng trên GitHub</h1>
         <p><strong>Phần lớn lập trình viên sẽ dành thời gian học tập trên hai trang nổi tiếng PornHub và GitHub. Tuy không có nhiều tư liệu bắt mắt nhưng GitHub host một lượng lớn các project open-source. Contribution sẽ là một nhu cầu tất yếu, nhưng contribute như thế nào để mọi người đều vui vẻ là câu chuyện dài với newbee.</strong></p>
         <h1 id="giithiu">Giới thiệu</h1>
@@ -326,6 +228,17 @@ This pull request is enhancing validation, resolve: #23
         <p>Có một số project họ đã chấp nhận code đó là trade-off thì bạn cũng không nên cố chấp sửa nó làm gì. Vì họ cũng đã cân nhắc kha khá, nên thường các pull request đụng vào dạng code này thì ít khi được merge trừ khi nó xuất sắc.</p>
         <h1 id="tmkt">Tạm kết</h1>
         <p>Bài viết không dài không ngắn, mình mong các bạn tìm ra được một điều gì đó hữu ích cho bản thân và cùng cho đi nhiều hơn. Nếu bài viết này có chỗ chưa thỏa đáng hoặc sai lỗi chính tả thì các bạn nhẹ tay dùm.</p><br />
+        <h1 id="onwardinxorcipher">Onward in XOR cipher</h1>
+        <p>A long time ago, I had readed this article <a href="https://blog.xrds.acm.org/2012/08/unbreakable-cryptography-in-5-minutes/">Unbreakable Cryptography in 5 Minutes</a>. I've realized <code>XOR Cipher</code> is secure as long as <code>key length</code> equal or greater than <code>data length</code>. It's sound stupid where data is fucking big but what if we could generate the key deterministically?.</p>
+        <h2 id="hashfunction">Hash function</h2>
+        <p>Hash function is some kind of deterministic algorithm, it's always giving the same result for the same input. And you could repeating hash function on the result of itself to get new <code>digest</code>, it won't repeat by sequence.</p>
+        <h2 id="proposingamethodtogenerateinfinitykeylength">Proposing a method to generate infinity key length</h2>
+        <p><img src="assets/content/xor-cipher.png" alt="xorCrypto" /></p>
+        <h2 id="implementation">Implementation</h2>
+        <ul>
+          <li><a href="https://www.npmjs.com/package/xorcrypto">NPM package</a></li>
+          <li><a href="https://github.com/chiro-hiro/xorcrypto">Source code</a></li>
+        </ul><br />
         <h1 id="implementsingletonngtrongtypescript">Implement Singleton đúng trong TypeScript</h1>
         <p>Một thanh niên viết bài hướng dẫn code JavaScript và TypeScript trên Medium. Mình đọc thấy bài viết sai hơn quá nửa, vậy mà cũng có 8K claps. Mình tự hỏi, mình đéo phải là ngu lắm rồi sao?, giờ lòi đâu ra 8K súc vật này?. Thậm chí thằng viết còn đéo thể phân biệt được cách define một object là <code>static</code> hay <code>dynamic</code> trong JavaScript. Nên mình chỉ xin mạn phép viết lại đoạn sai nhất trong bài.</p>
         <h2 id="singleton">Singleton</h2>
@@ -338,7 +251,7 @@ export function Singleton&lt;T&gt;(
   Constructor: new (...params: any[]) =&gt; T,
   ...constructorParams: any[]
 ): T {
-  if (typeof instanceCache[instanceName] !== 'undefined') {
+  if (typeof instanceCache[instanceName] === 'undefined') {
     // Construct new instance with given params
     instanceCache[instanceName] = new Constructor(...constructorParams);
   }
@@ -633,6 +546,93 @@ void packet_handler(
 00000240:   3E 00 DB 0E  85 B4 3F 56  55 34 2C C1  44 DD E8 9E    &gt;.....?VU4,.D...
 00000260:   09 A1 5C DB  BD 24 EF 9E  0C ED 4B                    ..\..$....K
 </code></pre><br />
+        <h1 id="xorshiftbasedpseudorandom">XorShift based pseudo random</h1>
+        <p>This paper <a href="https://www.jstatsoft.org/v08/i14/paper">Xorshift RNGs, July 2003, Marsaglia, George</a> was inspired me to create another kind of <code>Xorshift</code> based without static initial.</p>
+        <p>The basic concept is:</p>
+        <ul>
+          <li>Seeding with a initial value <code>seed</code></li>
+          <li>Repeat caculation for every bit of <code>seed</code></li>
+          <li><code>i</code> is denoted for bit <code>i th</code></li>
+          <li>Read <code>shift flag</code> by take less significant bit <code>RSHIFT(seed, i) AND 1</code></li>
+          <li>If <code>shift flag</code> equal to <code>0</code>: <code>result = result ^ RSHIFT(seed, i)</code></li>
+          <li>If <code>shift flag</code> equal to <code>1</code>: <code>result = result ^ LSHIFT(seed, i)</code></li>
+        </ul>
+        <h2 id="implementation">Implementation</h2>
+        <h3 id="implementinpython">Implement in Python</h3>
+        <pre><code class="python language-python">import random
+
+seed = random.randint(0x55555555, 0xffffffff)
+
+
+def rnd():
+    global seed
+    x = 0
+    for i in range(32):
+        if (seed &gt;&gt; i) &amp; 1:
+            x ^= seed &gt;&gt; i
+        else:
+            x ^= seed &lt;&lt; i
+    x = 0xffffffff &amp; x
+    seed = x
+    return x
+
+
+for i in range(1000):
+    print rnd()
+</code></pre>
+        <h3 id="implementinjavascript">Implement in JavaScript:</h3>
+        <pre><code class="js language-js">const crypto = require('crypto');
+
+//Generate seed randomBytes
+var seed = crypto.randomBytes(4).readUInt32LE(0);
+
+//XorShift based PRNG
+function rnd(){
+    var x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        //Shift right if [i th] bit is equal to 1, otherwise shift letf
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x &gt;&gt;&gt; 0;
+}
+
+for(let i = 0; i &lt; 1000; i++){
+  process.stdout.write(`${i}\n`)
+}
+</code></pre>
+        <h3 id="implementinc">Implement in C</h3>
+        <pre><code class="c language-c">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+unsigned int seed;
+
+unsigned int rnd(){
+    unsigned int x = 0, i;
+    for(i = 0; i &lt; 32; i++){
+        x ^= ((seed &gt;&gt; i) &amp; 1) ? seed &gt;&gt; i : seed &lt;&lt; i;
+    }
+    return seed = x;
+}
+
+int main(){
+    time_t tsec;
+    int i = 0;
+    tsec = time(NULL);
+    seed = (unsigned int)tsec;
+    for(;i &lt; 1000; i++) printf("%u\n", rnd());
+    return 0;
+}
+</code></pre>
+        <p>Test:</p>
+        <pre><code>gcc test.c -o test &amp;&amp; chmod a+x test &amp;&amp; ./test
+</code></pre>
+        <h2 id="conclusion">Conclusion</h2>
+        <ul>
+          <li><code>0x00000000</code> and other kind of <em>poor entropy seed</em> are the worst thing to this <strong>algorithm</strong></li>
+          <li>The result is predictable within disclosed <code>seed</code></li>
+          <li>We need some kind of <code>fallback mode</code> for <em>low entropy seed</em></li>
+          <li>It isn't safe for cryptography purpose</li>
+        </ul><br />
         <h1 id="programmingwithlibpcap">Programming with libpcap</h1>
         <p><code>libpcap</code> is a good library to capture network traffic, It's fun to programing with <code>libpcap</code> you could do some experiment or deal with lower layer of OSI model. I'm go back to programing with <code>libpcap</code> in the challenge of capture <code>TCP traffic</code>.</p>
         <h2 id="installdevelopmentenvironment">Install development environment</h2>

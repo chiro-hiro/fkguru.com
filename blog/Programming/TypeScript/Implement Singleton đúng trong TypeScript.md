@@ -15,7 +15,7 @@ export function Singleton<T>(
   Constructor: new (...params: any[]) => T,
   ...constructorParams: any[]
 ): T {
-  if (typeof instanceCache[instanceName] !== 'undefined') {
+  if (typeof instanceCache[instanceName] === 'undefined') {
     // Construct new instance with given params
     instanceCache[instanceName] = new Constructor(...constructorParams);
   }

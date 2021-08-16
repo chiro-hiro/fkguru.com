@@ -1,0 +1,189 @@
+<script text="text/javascript" src="assets/metamask.js"></script>
+<style>
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+  }
+  button {
+    min-width: 150px;
+  }
+  * {
+    margin: 5px;
+  }
+</style>
+<input id="textWalletAddress" size="50" disabled />
+<button id="buttonConnect">Connect</button>
+<br />
+<input id="textProposalId" size="50" />
+<button id="buttonCheck">Check</button>
+<div id="divLog"></div>
+<script>
+  const tokenData = [
+    // Ethereum blockchain
+    {
+      blockchain: "ethereum",
+      name: "Tether USD (USDT)",
+      address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      symbol: "USDT",
+      decimal: 6,
+    },
+    {
+      blockchain: "ethereum",
+      name: "Dai Stablecoin (DAI)",
+      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      symbol: "DAI",
+      decimal: 18,
+    },
+    {
+      blockchain: "ethereum",
+      name: "USD Coin (USDC)",
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      symbol: "USDC",
+      decimal: 6,
+    },
+    {
+      blockchain: "ethereum",
+      name: "Binance USD (BUSD)",
+      address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
+      symbol: "BUSD",
+      decimal: 18,
+    },
+    // Binance smart chain
+    {
+      blockchain: "binance",
+      name: "Binance-Peg BSC-USD",
+      address: "0x55d398326f99059fF775485246999027B3197955",
+      symbol: "USDT",
+      decimal: 18,
+    },
+    {
+      blockchain: "binance",
+      name: "Binance-Peg Dai Token (DAI)",
+      address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+      symbol: "DAI",
+      decimal: 18,
+    },
+    {
+      blockchain: "binance",
+      name: "Binance-Peg USD Coin (USDC)",
+      address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+      symbol: "USDC",
+      decimal: 18,
+    },
+    {
+      blockchain: "binance",
+      name: "Binance-Peg BUSD Token (BUSD)",
+      address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+      symbol: "BUSD",
+      decimal: 18,
+    },
+    // Test
+    /*
+    {
+      blockchain: "rinkeby",
+      name: "DAI Test",
+      address: "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
+      symbol: "DAI",
+      decimal: 18,
+    },
+    */
+  ];
+  const buttonConnect = document.querySelector("#buttonConnect");
+  const textWalletAddress = document.querySelector("#textWalletAddress");
+
+  const textProposalId = document.querySelector("#textProposalId");
+  const buttonCheck = document.querySelector("#buttonCheck");
+  const divLog = document.querySelector("#divLog");
+  const connector = MetaMaskConnector.getInstance();
+
+  function toFill(v) {
+    if (typeof v === "bigint" || typeof v === "number") {
+      return v.toString(16).padStart(64, "0");
+    }
+    return v.padStart(64, "0");
+  }
+
+  function superTrim(v, t = "0") {
+    r = "";
+    flag = false;
+    for (let i = 0; i < v.length; i += 1) {
+      if (v[i] !== "0") {
+        flag = true;
+      }
+      if (flag) r += v[i];
+    }
+    return r.length > 0 ? r : "0";
+  }
+
+  async function getLink(a) {
+    if ((await connector.getBlockchain()) === "ethereum") {
+      return `<a href="https://etherscan.io/address/${a}" target="_blank">${a}</a>`;
+    } else {
+      return `<a href="https://bscscan.com/address/${a}" target="_blank">${a}</a>`;
+    }
+  }
+
+  buttonConnect.addEventListener("click", async () => {
+    if (connector.isInstalled()) {
+      await connector.connect();
+      textWalletAddress.value = `${connector.getAddress()} [${await connector.getBlockchain()}]`;
+    } else {
+      alert("You must install metamask first");
+    }
+  });
+
+  buttonCheck.addEventListener("click", async () => {
+    const result = await ethereum.request({
+      method: "eth_call",
+      params: [
+        {
+          to: "0xDC9bD464Ab6cf1f8eB0F1a5D22d859e1FC10b65D",
+          data: `0xde78cfc1${toFill(
+            parseInt(textProposalId.value.trim(), 10)
+          )}`,
+        },
+      ],
+    });
+    const buf = [];
+    for (let i = 2; i < result.length; i += 64) {
+      if ([66, 130, 194, 258, 322, 386].includes(i)) {
+        buf.push(superTrim(result.substr(i, 64)));
+      }
+    }
+    const [vote, expired, executed, delegated, value, target] = buf.map(
+      (v, i) => {
+        if (i < 5) {
+          return parseInt(v, 16);
+        }
+        return `0x${v}`;
+      }
+    );
+    const data = result.substr(-192);
+    const method =
+      data.substr(0, 8) === "a9059cbb"
+        ? "transfer(address to, uint256 value)"
+        : "undefined";
+    const toAddress = `0x${data.substr(32, 40)}`;
+    const tokenAmount = BigInt(`0x${superTrim(data.substr(72, 64))}`);
+    const token = tokenData.filter(
+      (i) => i.address.toLowerCase() === target
+    )[0];
+    divLog.innerHTML = [
+      `Vote: ${vote}`,
+      `Expired: ${new Date(expired * 1000).toLocaleString()}`,
+      `Executed: ${executed}`,
+      `Delegated: ${value}`,
+      `Target: ${await getLink(target)}`,
+      `Method: ${method}`,
+      `Receiver: ${await getLink(toAddress)}`,
+      `Token amount: ${tokenAmount / 10n ** BigInt(token.decimal)} ${
+        token.symbol
+      }`,
+      `<br/>Mean: Transfer ${tokenAmount / 10n ** BigInt(token.decimal)} ${
+        token.symbol
+      } from: ${await getLink(
+        "0xdc9bd464ab6cf1f8eb0f1a5d22d859e1fc10b65d"
+      )} to ${await getLink(toAddress)}`,
+    ].join("<br/>\n");
+  });
+</script>

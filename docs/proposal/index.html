@@ -1,7 +1,7 @@
 <script text="text/javascript" src="assets/metamask.js"></script>
 <style>
   body {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     font-size: 1em;
   }
   button {
@@ -144,6 +144,10 @@
         },
       ],
     });
+    const latestBlock = await ethereum.request({
+      method: "eth_getBlockByNumber",
+      params: ["latest", true],
+    });
     const buf = [];
     for (let i = 2; i < result.length; i += 64) {
       if ([66, 130, 194, 258, 322, 386].includes(i)) {
@@ -158,6 +162,8 @@
         return `0x${v}`;
       }
     );
+    const currentTimestamp = Number(BigInt(latestBlock.timestamp));
+    const passed = currentTimestamp > expired; 
     const data = result.substr(-192);
     const method =
       data.substr(0, 8) === "a9059cbb"
@@ -170,7 +176,7 @@
     )[0];
     divLog.innerHTML = [
       `Vote: ${vote}`,
-      `Expired: ${new Date(expired * 1000).toLocaleString()}`,
+      `Expired: ${new Date(expired * 1000).toLocaleString()} (${passed ? 'passed' : 'will be passed in'} ${Math.abs(currentTimestamp - expired)} secs)`,
       `Executed: ${executed}`,
       `Delegated: ${value}`,
       `Target: ${await getLink(target)}`,

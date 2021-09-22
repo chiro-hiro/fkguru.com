@@ -1,0 +1,126 @@
+<script text="text/javascript" src="./assets/jquery.js"></script>
+<script text="text/javascript" src="assets/metamask.js"></script>
+<style>
+  body {
+    font-size: 1.6em;
+  }
+
+  * {
+    margin: 5px;
+  }
+
+  button {
+    min-width: 150px;
+  }
+</style>
+Wallet and network:<br />
+<input id="textWalletAddress" size="100" disabled />
+<button id="buttonConnect">Connect</button>
+<br />
+Amount:<br />
+<input id="textAmount" size="50" value="10" />
+<br />
+Currency:
+<select id="tokenType">
+  <option value="USDT">USDT</option>
+  <option value="USDC">USDC</option>
+  <option value="BUSD">BUSD</option>
+  <option value="DAI">DAI</option>
+  <option value="TET">TET</option>
+</select>
+<button id="buttonBuy">Buy</button>
+<br />
+<button id="buttonSwitchETH">Ethereum</button>
+<button id="buttonSwitchBSC">Binance</button>
+<button id="buttonSwitchPolygon">Polygon</button>
+<br />
+<div id="divData"></div>
+<button id="buttonSignIn">SignIn</button>
+
+<script>
+  const connector = MetaMaskConnector.getInstance();
+
+  if (localStorage.getItem("save") === null) {
+    localStorage.setItem("save", Date.now());
+  }
+
+  connector.on("chainChanged", (chainName) => {
+    const address = connector.getAddress();
+    if (address !== null) {
+      jQuery("#textWalletAddress").val(
+        `${address} [${connector.getBlockchain()}]`
+      );
+    }
+    console.log(`Change network to ${chainName}`);
+    if (chainName === "error") {
+      alert("We don not support this chain");
+    }
+  });
+
+  connector.on("accountsChanged", (accounts) => {
+    if (accounts.length > 0) {
+      console.log("Change accounts to:", accounts[0]);
+      jQuery("#divData").html(`You signed in as: ${accounts[0]}`);
+    } else {
+      alert("Can not get accounts");
+    }
+  });
+
+  connector.on("connected", async (chainName, walletAddress) => {
+    jQuery("#textWalletAddress").val(
+      `${connector.getAddress()} [${connector.getBlockchain()}] ${localStorage.getItem(
+        "save"
+      )}`
+    );
+    console.log(
+      `You wallet is connected to ${chainName}, your address is: ${walletAddress}`
+    );
+  });
+
+  jQuery("#buttonSignIn").on("click", async () => {
+    try {
+      await connector.signIn();
+    } catch (e) {
+      console.log(e);
+      // @todo: Add better modal here
+      alert(`${e.message}\n${e.stack}, ${JSON.stringify(e)}`);
+    }
+  });
+
+  jQuery("#buttonBuy").on("click", async () => {
+    try {
+      await connector.transfer(
+        connector.getBlockchain(),
+        jQuery("#tokenType").val().trim(),
+        jQuery("#textAmount").val().trim()
+      );
+    } catch (e) {
+      console.log(e);
+      // @todo: Add better modal here
+      alert(`${e.message}\n${e.stack}, ${JSON.stringify(e)}`);
+    }
+  });
+
+  jQuery("#buttonConnect").on("click", async () => {
+    if (connector.isInstalled()) {
+      await connector.connect();
+      jQuery("#textWalletAddress").val(
+        `${connector.getAddress()} [${connector.getBlockchain()}]`
+      );
+    } else {
+      alert("You must install metamask first");
+    }
+  });
+
+  jQuery("#buttonSwitchETH").on("click", async () => {
+    await connector.switchToEthereumMainnet();
+  });
+
+  jQuery("#buttonSwitchBSC").on("click", async () => {
+    await connector.switchToBinanceSmartChain();
+  });
+
+  jQuery("#buttonSwitchPolygon").on("click", async () => {
+    await connector.switchToPolygon();
+  });
+</script>

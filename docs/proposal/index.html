@@ -137,7 +137,7 @@
       method: "eth_call",
       params: [
         {
-          to: "0xDC9bD464Ab6cf1f8eB0F1a5D22d859e1FC10b65D",
+          to: "0xcC527eb38F459882f0efFbAB8fe79B47716DE72F",
           data: `0xde78cfc1${toFill(
             parseInt(textProposalId.value.trim(), 10)
           )}`,
@@ -163,7 +163,7 @@
       }
     );
     const currentTimestamp = Number(BigInt(latestBlock.timestamp));
-    const passed = currentTimestamp > expired; 
+    const passed = currentTimestamp > expired;
     const data = result.substr(-192);
     const method =
       data.substr(0, 8) === "a9059cbb"
@@ -176,7 +176,9 @@
     )[0];
     divLog.innerHTML = [
       `Vote: ${vote}`,
-      `Expired: ${new Date(expired * 1000).toLocaleString()} (${passed ? 'passed' : 'will be passed in'} ${Math.abs(currentTimestamp - expired)} secs)`,
+      `Expired: ${new Date(expired * 1000).toLocaleString()} (${
+        passed ? "passed" : "will be passed in"
+      } ${Math.abs(currentTimestamp - expired)} secs)`,
       `Executed: ${executed}`,
       `Delegated: ${value}`,
       `Target: ${await getLink(target)}`,
@@ -188,7 +190,7 @@
       `<br/>Mean: Transfer ${tokenAmount / 10n ** BigInt(token.decimal)} ${
         token.symbol
       } from: ${await getLink(
-        "0xdc9bd464ab6cf1f8eb0f1a5d22d859e1fc10b65d"
+        "0xcC527eb38F459882f0efFbAB8fe79B47716DE72F"
       )} to ${await getLink(toAddress)}`,
     ].join("<br/>\n");
   });
